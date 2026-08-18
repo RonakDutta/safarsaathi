@@ -5,13 +5,23 @@ const morgan = require("morgan");
 require("dotenv").config();
 
 app.use(express.json());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://safarsaathi-frontend.vercel.app",
+  "https://safarsaathi.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:5173",
-      "https://safarsaathi-frontend.vercel.app",
-    ],
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps or curl requests)
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

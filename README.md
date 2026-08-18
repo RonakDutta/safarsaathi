@@ -217,7 +217,7 @@ module.exports = async (req, res, next) => {
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://safarsaathi-backend-ofks.onrender.com",
+  baseURL: "https://safarsaathi-irhg.onrender.com",
 });
 
 instance.interceptors.request.use(
