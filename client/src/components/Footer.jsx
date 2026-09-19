@@ -1,24 +1,92 @@
-import { Link } from "react-router-dom";
-
 function Footer() {
   return (
-    <footer className="bg-slate-950 text-slate-300">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:grid-cols-[1.5fr_1fr_1fr] lg:px-8">
-        <div>
-          <Link to="/" className="brand text-white">Safar<span>Saathi</span></Link>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">Thoughtful, dependable driver booking for every hour your day needs.</p>
+    <div>
+      <footer className="bg-black pt-16 border-t border-[#2a2a2a]">
+        <div className="max-w-275 mx-auto px-8 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-8 pb-12">
+          <div>
+            <a
+              href="#"
+              className="text-[#ffc107] no-underline text-3xl font-bold mb-4 inline-block hover:text-[#ffc107]"
+            >
+              SafarSaathi
+            </a>
+            <p className="mb-4 text-[#e0e0e0]">
+              Your reliable partner for city travel. Connecting you to your
+              destination with comfort and safety.
+            </p>
+          </div>
+          <div>
+            <h4 className="text-white mb-4 text-xl font-medium">Quick Links</h4>
+            <ul className="list-none">
+              <li className="mb-2">
+                <a
+                  href="#"
+                  className="text-[#e0e0e0] no-underline hover:text-[#ffc107] hover:pl-1 transition-all duration-300"
+                >
+                  Home
+                </a>
+              </li>
+              <li className="mb-2">
+                <a
+                  href="#services"
+                  className="text-[#e0e0e0] no-underline hover:text-[#ffc107] hover:pl-1 transition-all duration-300"
+                >
+                  Services
+                </a>
+              </li>
+              <li className="mb-2">
+                <a
+                  href="#"
+                  className="text-[#e0e0e0] no-underline hover:text-[#ffc107] hover:pl-1 transition-all duration-300"
+                >
+                  Careers
+                </a>
+              </li>
+              <li className="mb-2">
+                <a
+                  href="#"
+                  className="text-[#e0e0e0] no-underline hover:text-[#ffc107] hover:pl-1 transition-all duration-300"
+                >
+                  Contact Us
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-white mb-4 text-xl font-medium">Follow Us</h4>
+            <div className="flex gap-4">
+              <a
+                href="#"
+                className="text-[#e0e0e0] text-2xl transition-colors duration-300 hover:text-[#ffc107]"
+              >
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a
+                href="#"
+                className="text-[#e0e0e0] text-2xl transition-colors duration-300 hover:text-[#ffc107]"
+              >
+                <i className="fab fa-twitter"></i>
+              </a>
+              <a
+                href="#"
+                className="text-[#e0e0e0] text-2xl transition-colors duration-300 hover:text-[#ffc107]"
+              >
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a
+                href="#"
+                className="text-[#e0e0e0] text-2xl transition-colors duration-300 hover:text-[#ffc107]"
+              >
+                <i className="fab fa-linkedin-in"></i>
+              </a>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-white">Explore</h2>
-          <div className="mt-4 flex flex-col items-start gap-3 text-sm"><Link to="/services" className="footer-link">Services</Link><Link to="/safety" className="footer-link">Safety</Link><Link to="/drive" className="footer-link">Drive with us</Link></div>
+        <div className="text-center py-6 border-t border-[#2a2a2a] text-sm text-[#888]">
+          <p>&copy; 2025 SafarSaathi. All Rights Reserved.</p>
         </div>
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-white">Stay connected</h2>
-          <div className="mt-4 flex gap-5 text-lg"><a href="#" aria-label="Instagram" className="footer-link"><i className="fab fa-instagram" /></a><a href="#" aria-label="LinkedIn" className="footer-link"><i className="fab fa-linkedin-in" /></a><a href="#" aria-label="Facebook" className="footer-link"><i className="fab fa-facebook-f" /></a></div>
-        </div>
-      </div>
-      <div className="border-t border-slate-800 px-5 py-5 text-center text-xs text-slate-500">© 2025 SafarSaathi. Made for moving cities.</div>
-    </footer>
+      </footer>
+    </div>
   );
 }
 

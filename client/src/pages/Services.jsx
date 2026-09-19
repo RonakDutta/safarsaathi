@@ -8,7 +8,7 @@ function Services() {
       <Navbar />
 
       {/* HERO SECTION  */}
-      <section className="pt-40 pb-20 text-center bg-[#121212]">
+      <section className="pt-40 pb-20 text-center bg-linear-to-b from-[#1e1e1e] to-[#121212]">
         <div className="max-w-4xl mx-auto px-8">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight">
             Hire a Driver <span className="text-[#ffc107]">On Your Terms</span>
