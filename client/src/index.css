@@ -1,26 +1,17 @@
 @import "tailwindcss";
 
-html {
-  scroll-behavior: smooth;
-  font-family: "Poppins", sans-serif;
-}
-
-html {
-  scrollbar-gutter: stable;
-  background-color: #000000;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
-}
+:root { font-family: "Outfit", system-ui, sans-serif; color: #0f172a; background: #fff; font-synthesis: none; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
+.brand { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.06em; color: #0f172a; text-decoration: none; }
+.brand span { color: #d97706; }
+.nav-link { border-bottom: 2px solid transparent; padding: .45rem 0; font-size: .875rem; font-weight: 600; color: #475569; text-decoration: none; transition: color .2s, border-color .2s; }
+.nav-link:hover, .nav-link-active { border-color: #d97706; color: #0f172a; }
+.button-primary { display: inline-flex; align-items: center; justify-content: center; background: #f59e0b; color: #111827; padding: .7rem 1rem; font-size: .875rem; font-weight: 700; text-decoration: none; transition: background .2s, transform .2s; }
+.button-primary:hover { background: #fbbf24; transform: translateY(-1px); }
+.text-button { border: 0; background: transparent; padding: .7rem .35rem; color: #334155; font-size: .875rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+.text-button:hover { color: #d97706; }
+.eyebrow { color: #b45309; font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.section-title { color: #0f172a; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 600; letter-spacing: -.055em; line-height: 1.02; }
+.footer-link { color: #94a3b8; text-decoration: none; transition: color .2s; }.footer-link:hover { color: #fbbf24; }
