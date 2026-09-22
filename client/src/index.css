@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* SafarSaathi palette — unchanged, just named so every page shares it. */
+/* SafarSaathi palette, named so every page shares it. */
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
 

@@ -142,7 +142,7 @@ function DrivePage() {
     return (
       <StatusPanel
         title="Your application is being reviewed."
-        body="Our team is checking your vehicle details and licence. Your account will be upgraded as soon as you're approved — just log in again to see your driver dashboard."
+        body="Our team is checking your vehicle details and licence. Your account will be upgraded as soon as you're approved. Just log in again to see your driver dashboard."
       >
         <Link to="/" className="link">
           Back to home
@@ -268,7 +268,7 @@ function DrivePage() {
                   Create an account
                 </Link>
                 <Link to="/login" className="btn-secondary py-3.5">
-                  I already have one — log in
+                  I already have an account
                 </Link>
               </div>
             </div>

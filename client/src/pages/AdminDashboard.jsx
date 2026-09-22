@@ -495,7 +495,7 @@ const AdminDashboard = () => {
                     <div>
                       <dt className="text-mute">Licence</dt>
                       <dd className="mt-0.5 break-all text-fog">
-                        {app.license_number || "—"}
+                        {app.license_number || "Not given"}
                       </dd>
                     </div>
                   </dl>
@@ -556,7 +556,7 @@ const AdminDashboard = () => {
                     </div>
                     <div className="col-span-2 min-w-0 text-sm md:col-span-1">
                       <p className="truncate text-fog tabular-nums">
-                        {driver.phone_number || "—"}
+                        {driver.phone_number || "No phone on file"}
                       </p>
                       <p className="truncate text-mute">{driver.email}</p>
                     </div>
@@ -565,7 +565,7 @@ const AdminDashboard = () => {
                         {driver.car_model || "No car on file"}
                       </p>
                       <p className="truncate text-mute">
-                        {driver.license_number || "—"}
+                        {driver.license_number || "No licence on file"}
                       </p>
                     </div>
                     <p className="col-start-2 row-start-1 text-right text-lg font-semibold text-white tabular-nums md:col-start-auto md:row-start-auto">

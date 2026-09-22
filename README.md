@@ -1,4 +1,4 @@
-# 🚖 SafarSaathi — Hourly Driver & Cab Booking Platform
+# 🚖 SafarSaathi: Hourly Driver & Cab Booking Platform
 
 **SafarSaathi** is a full-stack, production-grade hourly driver-on-demand and cab booking web application built for the Indian market. It enables customers to hire professional drivers for hourly durations (1–24 hours), processes online payments securely via Razorpay (with HMAC-SHA256 signature verification) or Cash, dispatches real-time WhatsApp & Email receipts via Twilio and Nodemailer, and provides dedicated Role-Based dashboards for **Admins** and **Drivers** with a 4-digit security PIN ride-completion mechanism.
 

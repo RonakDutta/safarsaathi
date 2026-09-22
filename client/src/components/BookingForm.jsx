@@ -158,7 +158,7 @@ function BookingForm() {
                 bookingId: res.data.bookingId,
               });
               toast.success(
-                "Payment received. Your booking is confirmed — driver details will reach you on WhatsApp.",
+                "Payment received and booking confirmed. Driver details will reach you on WhatsApp.",
                 { id: loadingToast, duration: 6000 },
               );
               resetTrip();

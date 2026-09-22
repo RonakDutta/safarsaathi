@@ -10,7 +10,7 @@ import DashboardShell, {
   EmptyState,
 } from "../components/dashboard/DashboardShell";
 import Dialog, { ConfirmDialog } from "../components/dashboard/Dialog";
-import { formatINR } from "../lib/pricing";
+import { HOURLY_RATE, formatINR } from "../lib/pricing";
 import {
   formatDate,
   hoursLabel,
@@ -121,7 +121,7 @@ function PastRides({ rides }) {
               {hoursLabel(ride.duration)} &middot; {ride.payment_method}
             </p>
             <p className="text-right font-semibold text-white tabular-nums">
-              {ride.amount ? formatINR(ride.amount) : "—"}
+              {formatINR(ride.amount || ride.duration * HOURLY_RATE)}
             </p>
           </li>
         ))}

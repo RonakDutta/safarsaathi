@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Plus, Minus } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import ClosingCta from "../components/ClosingCta";
-
-const VETTING_IMAGE =
-  "https://images.pexels.com/photos/376729/pexels-photo-376729.jpeg?auto=compress&cs=tinysrgb&w=1400";
-const SECURE_IMAGE =
-  "https://images.pexels.com/photos/1851415/pexels-photo-1851415.jpeg?auto=compress&cs=tinysrgb&w=1400";
+import { images } from "../lib/images";
 
 const journey = [
   {
@@ -46,7 +42,7 @@ const faqData = [
   {
     question: "What is the 4-digit PIN for?",
     answer:
-      "It confirms that you — not just the driver — agree the ride is over. Only share it once you've reached your destination.",
+      "It confirms that you, not just the driver, agree the ride is over. Only share it once you've reached your destination.",
   },
   {
     question: "Can a ride be cancelled?",
@@ -142,7 +138,7 @@ function SafetyPage() {
             </div>
             <div className="aspect-4/3 overflow-hidden rounded-xl border border-line">
               <img
-                src={VETTING_IMAGE}
+                src={images.vetting}
                 alt=""
                 className="h-full w-full object-cover"
               />
@@ -152,7 +148,7 @@ function SafetyPage() {
           <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
             <div className="aspect-4/3 overflow-hidden rounded-xl border border-line md:order-first">
               <img
-                src={SECURE_IMAGE}
+                src={images.payments}
                 alt=""
                 className="h-full w-full object-cover"
               />

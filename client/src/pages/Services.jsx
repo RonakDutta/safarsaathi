@@ -2,9 +2,7 @@ import { Check } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import ClosingCta from "../components/ClosingCta";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
-
-const INTERIOR_IMAGE =
-  "https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?q=80&w=1600&auto=format&fit=crop";
+import { images } from "../lib/images";
 
 const bookingTypes = [
   {
@@ -66,7 +64,7 @@ function Services() {
         </div>
         <div className="aspect-4/3 overflow-hidden rounded-xl border border-line">
           <img
-            src={INTERIOR_IMAGE}
+            src={images.carInterior}
             alt="Interior of a car from the back seat"
             className="h-full w-full object-cover"
           />
@@ -88,7 +86,7 @@ function Services() {
               <div>
                 <h3 className="text-xl font-semibold text-white">{type.name}</h3>
                 <p className="mt-1 text-sm text-mute">
-                  Usually {type.hours[0]}–{type.hours[1]} hours
+                  Usually {type.hours[0]} to {type.hours[1]} hours
                 </p>
               </div>
 
@@ -109,7 +107,7 @@ function Services() {
 
               <div className="md:text-right">
                 <p className="text-2xl font-semibold text-white tabular-nums">
-                  {formatINR(type.hours[0] * HOURLY_RATE)}–
+                  {formatINR(type.hours[0] * HOURLY_RATE)} to{" "}
                   {formatINR(type.hours[1] * HOURLY_RATE)}
                 </p>
                 <p className="mt-1 text-sm text-mute">at {formatINR(HOURLY_RATE)}/hr</p>
@@ -138,7 +136,7 @@ function Services() {
 
       <ClosingCta
         title="Ready when you are."
-        body="Choose your pickup point and hours — you'll see the exact fare before you confirm."
+        body="Choose your pickup point and hours. You'll see the exact fare before you confirm."
       />
     </PageLayout>
   );

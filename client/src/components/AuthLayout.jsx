@@ -1,9 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import Logo from "./Logo";
-
-const AUTH_IMAGE =
-  "https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1400&auto=format&fit=crop";
+import { images } from "../lib/images";
 
 function AuthLayout({ title, description, children, footer }) {
   return (
@@ -11,7 +9,7 @@ function AuthLayout({ title, description, children, footer }) {
       {/* Image side */}
       <div className="relative hidden overflow-hidden border-r border-line lg:block">
         <img
-          src={AUTH_IMAGE}
+          src={images.auth}
           alt=""
           className="absolute inset-0 h-full w-full object-cover opacity-60"
         />

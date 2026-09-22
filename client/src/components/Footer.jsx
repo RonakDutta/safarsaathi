@@ -26,7 +26,7 @@ function Footer() {
         <div className="max-w-xs">
           <Logo />
           <p className="mt-4 text-sm leading-relaxed text-mute">
-            Verified, professional drivers you can hire by the hour — for
+            Verified, professional drivers you can hire by the hour for
             errands, events, and everything in between.
           </p>
         </div>

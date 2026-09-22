@@ -3,9 +3,7 @@ import { ArrowRight } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import BookingForm from "../components/BookingForm";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
-
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1600&auto=format&fit=crop";
+import { images } from "../lib/images";
 
 const examples = [
   { use: "Groceries and a couple of errands", hours: 2 },
@@ -28,7 +26,7 @@ const steps = [
   },
   {
     title: "Close the ride with your PIN",
-    body: "Along with the driver details you get a 4-digit PIN. Share it only when you're done — that's what ends the ride.",
+    body: "Along with the driver details you get a 4-digit PIN. Share it only when you're done, because that's what ends the ride.",
   },
 ];
 
@@ -64,7 +62,7 @@ function Home() {
 
           <div className="relative mt-10 hidden flex-1 overflow-hidden rounded-xl border border-line lg:block">
             <img
-              src={HERO_IMAGE}
+              src={images.hero}
               alt="City road at night seen through a car windscreen"
               className="absolute inset-0 h-full w-full object-cover"
             />
