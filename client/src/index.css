@@ -1,19 +1,96 @@
 @import "tailwindcss";
 
+/* SafarSaathi palette — unchanged, just named so every page shares it. */
+@theme {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #000000;
+  --color-coal: #0a0a0a;
+  --color-panel: #121212;
+  --color-raise: #1e1e1e;
+  --color-line: #2a2a2a;
+  --color-edge: #3a3a3a;
+  --color-fog: #e0e0e0;
+  --color-mute: #8c8c8c;
+  --color-dim: #5c5c5c;
+  --color-amber: #ffc107;
+  --color-amber-soft: #ffca2c;
+  --color-danger: #ff4444;
+  --color-ok: #4ade80;
+}
+
 html {
   scroll-behavior: smooth;
-  font-family: "Poppins", sans-serif;
-}
-
-html {
   scrollbar-gutter: stable;
-  background-color: #000000;
+  background-color: var(--color-ink);
+  color: var(--color-fog);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-@keyframes fadeIn {
+body {
+  min-width: 320px;
+}
+
+::selection {
+  background: var(--color-amber);
+  color: #000;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="range"] {
+  accent-color: var(--color-amber);
+}
+
+@utility field {
+  @apply w-full rounded-lg border border-line bg-coal px-4 py-3 text-[15px] text-white transition-colors placeholder:text-dim hover:border-edge focus:border-amber focus:outline-none disabled:cursor-not-allowed disabled:text-mute;
+}
+
+@utility field-label {
+  @apply mb-2 block text-sm font-medium text-fog;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-5 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-amber text-black hover:bg-amber-soft;
+}
+
+@utility btn-secondary {
+  @apply btn border border-line bg-transparent text-white hover:border-edge hover:bg-raise;
+}
+
+@utility btn-danger {
+  @apply btn border border-line bg-transparent text-danger hover:border-danger/60 hover:bg-danger/10;
+}
+
+@utility link {
+  @apply font-medium text-amber underline decoration-amber/40 underline-offset-4 transition-colors hover:decoration-amber;
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-6xl px-5 md:px-8;
+}
+
+@keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -21,6 +98,15 @@ html {
   }
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-rise {
+    animation: none;
+  }
 }

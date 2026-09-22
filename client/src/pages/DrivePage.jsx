@@ -1,19 +1,76 @@
-import React, { useState, useEffect, useContext } from "react";
-import Navbar from "../components/Navbar";
+import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
+import { Check, LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
+import PageLayout from "../components/PageLayout";
+
+const requirements = [
+  "A SafarSaathi account",
+  "A working email and phone number",
+  "A registered car you'll drive",
+  "A valid government driving licence",
+];
+
+const afterApplying = [
+  {
+    title: "We review your details",
+    body: "Our team checks your licence number and vehicle by hand.",
+  },
+  {
+    title: "Your account is upgraded",
+    body: "Once approved, you log in as usual and get a driver dashboard.",
+  },
+  {
+    title: "Rides are assigned to you",
+    body: "Bookings appear on your dashboard with the pickup, hours and customer's number.",
+  },
+];
+
+const fields = [
+  { name: "name", label: "Full name", type: "text", autoComplete: "name" },
+  { name: "email", label: "Email", type: "email", autoComplete: "email" },
+  { name: "phone", label: "Phone number", type: "tel", autoComplete: "tel" },
+  {
+    name: "carModel",
+    label: "Car model",
+    type: "text",
+    placeholder: "e.g. Maruti Swift 2020",
+  },
+  {
+    name: "licenseNumber",
+    label: "Driving licence number",
+    type: "text",
+    placeholder: "e.g. MH12 20190012345",
+  },
+];
+
+function StatusPanel({ title, body, children }) {
+  return (
+    <PageLayout>
+      <section className="container-page py-24 lg:py-32">
+        <div className="max-w-xl border-l-2 border-amber pl-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            {title}
+          </h1>
+          <p className="mt-4 text-lg leading-relaxed text-mute">{body}</p>
+          <div className="mt-8">{children}</div>
+        </div>
+      </section>
+    </PageLayout>
+  );
+}
 
 function DrivePage() {
-  const [showModal, setShowModal] = useState(false);
   const { user } = useContext(AuthContext);
   const [appStatus, setAppStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    name: user?.full_name || user?.name || "",
+    email: user?.email || "",
     phone: "",
     carModel: "",
     licenseNumber: "",
@@ -30,7 +87,7 @@ function DrivePage() {
       if (user) {
         try {
           const res = await axios.get("/api/driver/my-application-status");
-          if (res.data) setAppStatus(res.data.status); // Will be 'pending', 'rejected', or null
+          if (res.data) setAppStatus(res.data.status); // 'pending', 'rejected', or null
         } catch (err) {
           console.error("Error checking status", err);
         }
@@ -47,289 +104,178 @@ function DrivePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       await axios.post("/api/driver-apply", formData);
-      toast.success("Application Sent! We will contact you.");
-      setShowModal(false);
+      toast.success("Application sent. We'll be in touch.");
       setAppStatus("pending");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        carModel: "",
-        licenseNumber: "",
-      });
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.error || "Failed to send application");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="bg-[#121212] min-h-screen flex items-center justify-center text-[#ffc107]">
-        <i className="fas fa-spinner fa-spin text-4xl"></i>
+      <div className="flex min-h-screen items-center justify-center bg-ink text-amber">
+        <LoaderCircle size={32} className="animate-spin" />
       </div>
     );
   }
 
-  // SCENARIO 1: ALREADY A DRIVER
   if (appStatus === "already_driver") {
     return (
-      <div className="bg-[#121212] min-h-screen font-['Poppins',sans-serif]">
-        <Navbar />
-        <div className="pt-40 px-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 bg-[#1e1e1e] border border-[#ffc107] rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(255,193,7,0.2)]">
-            <i className="fas fa-car text-4xl text-[#ffc107]"></i>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            You're already a SafarDriver!
-          </h2>
-          <p className="text-gray-400 mb-8 max-w-md">
-            Your account is fully approved. Head over to your dashboard to start
-            accepting rides and earning.
-          </p>
-          <Link
-            to="/driver"
-            className="bg-[#ffc107] text-black font-bold px-8 py-4 rounded-4xl hover:bg-[#ffca2c] transition-all shadow-[0_4px_15px_rgba(255,193,7,0.2)]"
-          >
-            Go to Dashboard
-          </Link>
-        </div>
-      </div>
+      <StatusPanel
+        title="You're already driving with us."
+        body="Your account is approved. Open your dashboard to see the rides assigned to you."
+      >
+        <Link to="/driver" className="btn-primary px-6 py-3.5">
+          Go to my rides
+        </Link>
+      </StatusPanel>
     );
   }
 
-  // SCENARIO 2: PENDING APPLICATION
   if (appStatus === "pending") {
     return (
-      <div className="bg-[#121212] min-h-screen font-['Poppins',sans-serif]">
-        <Navbar />
-        <div className="pt-40 px-6 flex flex-col items-center text-center">
-          <div className="w-24 h-24 bg-[#1e1e1e] border border-[#333] rounded-full flex items-center justify-center mb-6">
-            <i className="fas fa-clock text-4xl text-[#ffc107] animate-pulse"></i>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">
-            Application Under Review
-          </h2>
-          <p className="text-gray-400 max-w-md mb-8">
-            Our team is currently verifying your vehicle details and license. We
-            will notify you once you are approved by the Admin.
-          </p>
-          <Link
-            to="/"
-            className="text-[#888] hover:text-white transition-colors underline underline-offset-4"
-          >
-            Return to Home
-          </Link>
-        </div>
-      </div>
+      <StatusPanel
+        title="Your application is being reviewed."
+        body="Our team is checking your vehicle details and licence. Your account will be upgraded as soon as you're approved — just log in again to see your driver dashboard."
+      >
+        <Link to="/" className="link">
+          Back to home
+        </Link>
+      </StatusPanel>
     );
   }
 
-  // SCENARIO 3: NORMAL PAGE VIEW
   return (
-    <div className="bg-[#121212] min-h-screen font-['Poppins',sans-serif]">
-      <Navbar />
+    <PageLayout>
+      <section className="container-page grid gap-14 py-16 lg:grid-cols-[minmax(0,1fr)_27rem] lg:gap-20 lg:py-24">
+        <div>
+          <h1 className="max-w-xl text-4xl leading-[1.08] font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
+            Drive with SafarSaathi, on your own schedule.
+          </h1>
+          <p className="mt-6 max-w-lg text-lg leading-relaxed text-mute">
+            Customers book drivers by the hour, so there&apos;s no chasing
+            short trips. Apply once, get verified, and take the rides that are
+            assigned to you.
+          </p>
 
-      {/* DRIVER APPLICATION MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="relative bg-[#1e1e1e] px-8 py-10 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] w-full max-w-112.5 text-center border border-[#2a2a2a]">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 bg-transparent border-none text-[#888] text-xl cursor-pointer transition-all duration-300 p-2 hover:text-[#ffc107] hover:rotate-90 flex items-center justify-center"
-            >
-              <i className="fas fa-times"></i>
-            </button>
-
-            <div className="mb-8">
-              <h2 className="text-white text-3xl font-semibold mb-2 tracking-wide">
-                Driver Application
+          <div className="mt-14 grid gap-12 sm:grid-cols-2">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                What you&apos;ll need
               </h2>
-              <p className="text-[#e0e0e0] text-sm opacity-80">
-                Join our fleet today
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <div className="relative group">
-                <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107]"
-                  required
-                />
-              </div>
-              <div className="relative group">
-                <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email Address"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107]"
-                  required
-                />
-              </div>
-              <div className="relative group">
-                <i className="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone Number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107]"
-                  required
-                />
-              </div>
-              <div className="relative group">
-                <i className="fas fa-car absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-                <input
-                  type="text"
-                  name="carModel"
-                  placeholder="Car Model (e.g. Swift 2020)"
-                  value={formData.carModel}
-                  onChange={handleChange}
-                  className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107]"
-                  required
-                />
-              </div>
-              <div className="relative group">
-                <i className="fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-                <input
-                  type="text"
-                  name="licenseNumber"
-                  placeholder="Driving License Number"
-                  value={formData.licenseNumber}
-                  onChange={handleChange}
-                  className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107]"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full py-3.5 mt-2 border-none rounded-lg bg-[#ffc107] text-black font-semibold text-base cursor-pointer transition-all duration-300 hover:bg-[#ffca2c] hover:-translate-y-0.5 shadow-[0_4px_15px_rgba(255,193,7,0.2)] active:scale-95"
-              >
-                Submit Application
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <div className="pb-16">
-        {/* Hero Section */}
-        <section className="pt-40 pb-20 text-center bg-linear-to-b from-[#1e1e1e] to-[#121212]">
-          <div className="max-w-4xl mx-auto px-8">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight">
-              Drive with Us,{" "}
-              <span className="text-[#ffc107]">Earn on Your Terms</span>
-            </h1>
-            <p className="text-xl max-w-2xl mx-auto text-[#e0e0e0] leading-relaxed mb-10">
-              Take control of your schedule and your earnings. Apply today to
-              become a verified SafarSaathi driver.
-            </p>
-            {!user ? (
-              <Link
-                to="/login"
-                className="inline-block px-10 py-4 rounded-full font-bold text-lg bg-[#333] text-white hover:bg-[#444] transition-all"
-              >
-                Login to Apply
-              </Link>
-            ) : (
-              <button
-                onClick={() => setShowModal(true)}
-                className="inline-block px-10 py-4 rounded-full font-bold text-lg bg-[#ffc107] text-black hover:bg-[#ffca2c] hover:shadow-[0_0_20px_rgba(255,193,7,0.4)] transition-all"
-              >
-                Start Application
-              </button>
-            )}
-          </div>
-        </section>
-
-        {/* Benefits Section */}
-        <section className="py-24 max-w-5xl mx-auto px-8">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-16 text-center md:text-left">
-            <div className="bg-[#ffc107] text-black rounded-full w-20 h-20 flex items-center justify-center text-3xl shrink-0 shadow-[0_0_20px_rgba(255,193,7,0.3)]">
-              <i className="fas fa-shield-alt"></i>
-            </div>
-            <div>
-              <h3 className="text-3xl mb-3 text-white font-bold">
-                Admin Verification
-              </h3>
-              <p className="text-[#e0e0e0] text-lg leading-relaxed max-w-2xl">
-                To maintain trust, every driver on our platform is manually
-                verified by our team. Your data is stored securely in our
-                Postgres database.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-16 text-center md:text-left">
-            <div className="bg-[#ffc107] text-black rounded-full w-20 h-20 flex items-center justify-center text-3xl shrink-0 shadow-[0_0_20px_rgba(255,193,7,0.3)]">
-              <i className="fas fa-credit-card"></i>
-            </div>
-            <div>
-              <h3 className="text-3xl mb-3 text-white font-bold">
-                Secure Payments
-              </h3>
-              <p className="text-[#e0e0e0] text-lg leading-relaxed max-w-2xl">
-                All customer bookings are handled through Razorpay. You receive
-                your hard-earned money safely and transparently.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-16 text-center md:text-left">
-            <div className="bg-[#ffc107] text-black rounded-full w-20 h-20 flex items-center justify-center text-3xl shrink-0 shadow-[0_0_20px_rgba(255,193,7,0.3)]">
-              <i className="fas fa-tasks"></i>
-            </div>
-            <div>
-              <h3 className="text-3xl mb-3 text-white font-bold">
-                Smart Assignment
-              </h3>
-              <p className="text-[#e0e0e0] text-lg leading-relaxed max-w-2xl">
-                Once a customer requests a ride, you are directly assigned the
-                trip. Use your personal dashboard to track and complete rides.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Requirements Section */}
-        <div className="max-w-5xl mx-auto px-8">
-          <section className="bg-[#1e1e1e] border border-[#333] rounded-[20px] p-8 md:p-12 hover:border-[#ffc107]/50 transition-all duration-300">
-            <h2 className="text-left mb-8 text-white text-3xl md:text-4xl font-bold">
-              Driver Requirements
-            </h2>
-            <ul className="grid md:grid-cols-2 gap-6">
-              {[
-                "Create a SafarSaathi Account",
-                "Valid Email & Phone Number",
-                "A Registered Car Model",
-                "Valid Government License Number",
-              ].map((item, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-4 bg-[#2a2a2a] p-4 rounded-lg"
-                >
-                  <i className="fas fa-check-circle text-[#ffc107] text-xl"></i>
-                  <span className="text-[#e0e0e0] text-lg font-medium">
+              <ul className="mt-5 space-y-3">
+                {requirements.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-fog">
+                    <Check size={18} className="mt-0.5 shrink-0 text-amber" />
                     {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                After you apply
+              </h2>
+              <ol className="mt-5 space-y-5">
+                {afterApplying.map((step, index) => (
+                  <li key={step.title} className="grid grid-cols-[1.5rem_1fr]">
+                    <span className="font-semibold text-amber tabular-nums">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-medium text-white">{step.title}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-mute">
+                        {step.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+
+        <div id="apply">
+          {user ? (
+            <form
+              onSubmit={handleSubmit}
+              className="rounded-xl border border-line bg-panel"
+            >
+              <div className="border-b border-line px-6 py-5">
+                <h2 className="text-lg font-semibold text-white">
+                  Driver application
+                </h2>
+                {appStatus === "rejected" && (
+                  <p className="mt-2 text-sm text-mute">
+                    Your last application wasn&apos;t approved. Check your
+                    details and feel free to apply again.
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-5 px-6 py-6">
+                {fields.map((field) => (
+                  <div key={field.name}>
+                    <label htmlFor={`apply-${field.name}`} className="field-label">
+                      {field.label}
+                    </label>
+                    <input
+                      id={`apply-${field.name}`}
+                      type={field.type}
+                      name={field.name}
+                      autoComplete={field.autoComplete}
+                      placeholder={field.placeholder}
+                      value={formData[field.name]}
+                      onChange={handleChange}
+                      className="field"
+                      required
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-line px-6 py-5">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-primary w-full py-3.5 text-base"
+                >
+                  {isSubmitting && (
+                    <LoaderCircle size={18} className="animate-spin" />
+                  )}
+                  Submit application
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="rounded-xl border border-line bg-panel p-8">
+              <h2 className="text-xl font-semibold text-white">
+                Start with an account
+              </h2>
+              <p className="mt-3 leading-relaxed text-mute">
+                Applications are linked to your SafarSaathi account, so we can
+                upgrade it once you&apos;re approved.
+              </p>
+              <div className="mt-8 flex flex-col gap-3">
+                <Link to="/signup" className="btn-primary py-3.5">
+                  Create an account
+                </Link>
+                <Link to="/login" className="btn-secondary py-3.5">
+                  I already have one — log in
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+    </PageLayout>
   );
 }
 
