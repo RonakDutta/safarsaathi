@@ -14,7 +14,20 @@ import DriverDashboard from "./pages/DriverDashboard";
 function App() {
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "#1e1e1e",
+            color: "#e0e0e0",
+            border: "1px solid #2a2a2a",
+            borderRadius: "10px",
+            fontSize: "14px",
+          },
+          success: { iconTheme: { primary: "#ffc107", secondary: "#000" } },
+          error: { iconTheme: { primary: "#ff4444", secondary: "#000" } },
+        }}
+      />
 
       <Routes>
         <Route path="/" element={<Home />} />

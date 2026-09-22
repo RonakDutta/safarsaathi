@@ -31,8 +31,8 @@ router.get("/stats", authorize, admin, async (req, res) => {
       "SELECT COUNT(*) FROM driver_applications WHERE status = 'pending'",
     );
     const revenue = await pool.query(
-      "SELECT SUM(duration) * 500 as total FROM bookings",
-    ); // Assuming 500/hr
+      "SELECT SUM(duration) * 200 as total FROM bookings",
+    ); // Matches the ₹200/hr fare charged in routes/booking.js
 
     res.json({
       totalBookings: bookingCount.rows[0].count,

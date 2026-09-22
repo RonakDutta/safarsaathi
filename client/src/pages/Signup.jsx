@@ -1,19 +1,19 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { LoaderCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
+import AuthLayout from "../components/AuthLayout";
+import PasswordField from "../components/PasswordField";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  const handleClose = () => {
-    navigate("/");
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +23,9 @@ const Signup = () => {
       return;
     }
 
+    setIsSubmitting(true);
     const success = await register(name, email, password, "customer");
+    setIsSubmitting(false);
 
     if (success) {
       navigate("/");
@@ -31,88 +33,73 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#121212] font-['Poppins',sans-serif] p-4 bg-[linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url('https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=2070&auto-format&fit=crop')] bg-cover bg-center bg-fixed">
-      {/* Container - Fixed max-width and padding for better mobile view */}
-      <div className="relative bg-[#1e1e1e] px-8 py-10 md:px-12 md:py-12 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] w-full max-w-112.5 text-center border border-[#2a2a2a]">
-        {/* Close Button */}
-        <button
-          className="absolute top-4 right-4 bg-transparent border-none text-[#888] text-xl cursor-pointer transition-all duration-300 p-2 hover:text-[#ffc107] hover:rotate-90 flex items-center justify-center"
-          onClick={handleClose}
-        >
-          <i className="fas fa-times"></i>
-        </button>
-
-        {/* Header */}
-        <div className="mb-8">
-          <h2 className="text-white text-3xl font-semibold mb-2 tracking-wide">
-            Create Account
-          </h2>
-          <p className="text-[#e0e0e0] text-sm opacity-80">
-            Join SafarSaathi today
-          </p>
+    <AuthLayout
+      title="Create your account"
+      description="You'll need one to book a ride or apply to drive."
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link to="/login" className="link">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="signup-name" className="field-label">
+            Full name
+          </label>
+          <input
+            id="signup-name"
+            type="text"
+            autoComplete="name"
+            placeholder="As you'd like drivers to see it"
+            className="field"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {/* Name Input */}
-          <div className="relative group">
-            <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-            <input
-              type="text"
-              placeholder="Full Name"
-              className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107] focus:shadow-[0_0_0_3px_rgba(255,193,7,0.1)]"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+        <div>
+          <label htmlFor="signup-email" className="field-label">
+            Email
+          </label>
+          <input
+            id="signup-email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="field"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-          {/* Email Input */}
-          <div className="relative group">
-            <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-            <input
-              type="email"
-              placeholder="Email Address"
-              className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107] focus:shadow-[0_0_0_3px_rgba(255,193,7,0.1)]"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+        <div>
+          <label htmlFor="signup-password" className="field-label">
+            Password
+          </label>
+          <PasswordField
+            id="signup-password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
 
-          {/* Password Input */}
-          <div className="relative group">
-            <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#888] transition-colors duration-300 group-focus-within:text-[#ffc107]"></i>
-            <input
-              type="password"
-              placeholder="Password"
-              className="w-full py-3.5 pr-4 pl-11 bg-[#2a2a2a] border border-[#444] rounded-lg text-[#e0e0e0] text-base transition-all duration-300 placeholder:text-[#666] focus:outline-none focus:border-[#ffc107] focus:shadow-[0_0_0_3px_rgba(255,193,7,0.1)]"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-3.5 mt-2 border-none rounded-lg bg-[#ffc107] text-black font-semibold text-base cursor-pointer transition-all duration-300 hover:bg-[#ffca2c] hover:-translate-y-0.5 hover:shadow-[0_4px_15px_rgba(255,193,7,0.2)] active:scale-95"
-          >
-            Sign Up
-          </button>
-        </form>
-
-        {/* Toggle Link */}
-        <p className="mt-8 text-sm text-[#e0e0e0]">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-[#ffc107] font-semibold cursor-pointer transition-colors duration-300 hover:text-[#ffca2c] ml-1 hover:underline"
-          >
-            Login
-          </Link>
-        </p>
-      </div>
-    </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-primary mt-3 w-full py-3.5 text-base"
+        >
+          {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
+          Create account
+        </button>
+      </form>
+    </AuthLayout>
   );
 };
 
