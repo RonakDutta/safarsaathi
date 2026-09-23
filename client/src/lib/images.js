@@ -2,6 +2,8 @@
 export const images = {
   hero: "https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1600&auto=format&fit=crop",
   auth: "https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=1400&auto=format&fit=crop",
+  whyUs:
+    "https://images.pexels.com/photos/1521580/pexels-photo-1521580.jpeg?auto=compress&cs=tinysrgb&w=1400",
   carInterior:
     "https://images.unsplash.com/photo-1610647752706-3bb12232b3ab?q=80&w=1600&auto=format&fit=crop",
   vetting:

@@ -6,7 +6,15 @@ import Logo from "../Logo";
  * Shared frame for the admin and driver dashboards.
  * `nav` is a list of { key, label, icon, count, highlight }.
  */
-function DashboardShell({ label, nav, active, onNavigate, user, onLogout, children }) {
+function DashboardShell({
+  label,
+  nav,
+  active,
+  onNavigate,
+  user,
+  onLogout,
+  children,
+}) {
   const displayName = user?.full_name || user?.name || label;
 
   return (
@@ -26,7 +34,7 @@ function DashboardShell({ label, nav, active, onNavigate, user, onLogout, childr
                 key={item.key}
                 onClick={() => onNavigate(item.key)}
                 aria-current={isActive ? "page" : undefined}
-                className={`relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
                   isActive
                     ? "bg-raise text-white before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:bg-amber"
                     : "text-mute hover:bg-panel hover:text-white"
@@ -51,7 +59,7 @@ function DashboardShell({ label, nav, active, onNavigate, user, onLogout, childr
         <div className="border-t border-line p-3">
           <Link
             to="/"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-mute transition-colors hover:bg-panel hover:text-white"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-mute transition-colors duration-200 hover:bg-panel hover:text-white"
           >
             <ArrowUpRight size={18} />
             View website
@@ -100,7 +108,7 @@ function DashboardShell({ label, nav, active, onNavigate, user, onLogout, childr
                 key={item.key}
                 onClick={() => onNavigate(item.key)}
                 aria-current={isActive ? "page" : undefined}
-                className={`-mb-px flex shrink-0 items-center gap-1.5 border-b-2 py-3 text-sm font-medium whitespace-nowrap ${
+                className={`-mb-px flex shrink-0 items-center gap-1.5 border-b-2 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 ${
                   isActive
                     ? "border-amber text-white"
                     : "border-transparent text-mute"
@@ -147,7 +155,7 @@ export function StatStrip({ stats }) {
   const fourUp = stats.length === 4;
   return (
     <dl
-      className={`grid overflow-hidden rounded-xl border border-line bg-panel ${
+      className={`grid overflow-hidden rounded-2xl border border-line bg-panel ${
         fourUp ? "grid-cols-2 lg:grid-cols-4" : "grid-cols-3"
       }`}
     >
@@ -177,7 +185,7 @@ export function StatStrip({ stats }) {
 
 export function EmptyState({ title, body }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-16 text-center">
+    <div className="animate-fade rounded-2xl border border-dashed border-line px-6 py-16 text-center">
       <p className="font-medium text-white">{title}</p>
       {body && <p className="mt-1 text-sm text-mute">{body}</p>}
     </div>

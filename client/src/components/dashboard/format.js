@@ -1,11 +1,23 @@
+const badge =
+  "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap";
+
 export const statusMeta = {
-  pending: { label: "Needs a driver", className: "text-mute" },
-  confirmed: { label: "Driver assigned", className: "text-amber" },
-  completed: { label: "Completed", className: "text-ok" },
+  pending: {
+    label: "Needs a driver",
+    className: `${badge} bg-white/5 text-fog`,
+  },
+  confirmed: {
+    label: "Driver assigned",
+    className: `${badge} bg-amber/10 text-amber`,
+  },
+  completed: { label: "Completed", className: `${badge} bg-ok/10 text-ok` },
 };
 
 export const getStatus = (status) =>
-  statusMeta[status] || { label: status, className: "text-mute" };
+  statusMeta[status] || {
+    label: status,
+    className: `${badge} bg-white/5 text-mute`,
+  };
 
 export const formatDate = (value) => {
   if (!value) return "";

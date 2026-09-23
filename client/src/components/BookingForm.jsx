@@ -1,22 +1,37 @@
 import { useEffect, useState, useContext } from "react";
-import { Link } from "react-router-dom";
-import { LocateFixed, LoaderCircle } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  LocateFixed,
+  LoaderCircle,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  CreditCard,
+  Banknote,
+} from "lucide-react";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import axios from "../api/axios";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
 
 const DEFAULT_HOURS = 2;
+const quickHours = [2, 4, 8, 12];
+
+const iconClass =
+  "pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber";
 
 const paymentOptions = [
   {
     value: "Online",
     label: "Pay online",
+    icon: CreditCard,
     hint: "UPI, card or netbanking through Razorpay, before the ride.",
   },
   {
     value: "Cash",
     label: "Pay in cash",
+    icon: Banknote,
     hint: "Hand the fare to your driver when the ride ends.",
   },
 ];
@@ -39,7 +54,14 @@ function BookingForm() {
   const [pickup, setPickup] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [duration, setDuration] = useState(DEFAULT_HOURS);
+  const [searchParams] = useSearchParams();
+  // Links like /?hours=8#book arrive with the duration already picked
+  const [duration, setDuration] = useState(() => {
+    const hours = Number(searchParams.get("hours"));
+    return Number.isInteger(hours) && hours >= 1 && hours <= 24
+      ? hours
+      : DEFAULT_HOURS;
+  });
   const [paymentMethod, setPaymentMethod] = useState("Online");
   const [isLocating, setIsLocating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +89,7 @@ function BookingForm() {
       return;
     }
     setIsLocating(true);
-    const loadingToast = toast.loading("Finding your location...");
+    const loadingToast = toast.loading("Finding your location");
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -129,7 +151,7 @@ function BookingForm() {
     };
 
     setIsSubmitting(true);
-    const loadingToast = toast.loading("Processing your booking...");
+    const loadingToast = toast.loading("Processing your booking");
 
     try {
       const res = await axios.post("/api/book-ride", messageBody);
@@ -151,7 +173,7 @@ function BookingForm() {
           description: `Driver booking for ${duration} hours`,
           order_id: res.data.order.id,
           handler: async function (response) {
-            toast.loading("Verifying payment...", { id: loadingToast });
+            toast.loading("Verifying your payment", { id: loadingToast });
             try {
               await axios.post("/api/book-ride/verify-payment", {
                 ...response,
@@ -216,42 +238,53 @@ function BookingForm() {
     setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
   };
 
-  const activePayment = paymentOptions.find((o) => o.value === paymentMethod);
+  const fill = ((duration - 1) / 23) * 100;
 
   return (
     <form
+      id="book"
       onSubmit={handleBooking}
-      className="rounded-xl border border-line bg-panel"
+      className="scroll-mt-24 overflow-hidden rounded-2xl border border-white/10 bg-panel/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md"
       noValidate
     >
-      <div className="border-b border-line px-6 py-5">
-        <h2 className="text-lg font-semibold text-white">Book a driver</h2>
+      <div className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-7">
+        <h2 className="text-xl font-semibold text-white">Book your ride</h2>
+        <span className="rounded-full bg-amber/10 px-3 py-1 text-xs font-semibold text-amber">
+          {formatINR(HOURLY_RATE)} / hour
+        </span>
       </div>
 
-      <div className="space-y-5 px-6 py-6">
+      <div className="space-y-5 px-6 py-6 sm:px-7">
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="book-name" className="field-label">
               Full name
             </label>
-            <input
-              id="book-name"
-              type="text"
-              autoComplete="name"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={isAuthenticated}
-              className="field"
-            />
+            <div className="group relative">
+              <User size={17} className={iconClass} />
+              <input
+                id="book-name"
+                type="text"
+                autoComplete="name"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isAuthenticated}
+                className="field pl-11"
+              />
+            </div>
           </div>
 
           <div>
             <label htmlFor="book-phone" className="field-label">
               WhatsApp number
             </label>
-            <div className="flex rounded-lg border border-line bg-coal transition-colors focus-within:border-amber hover:border-edge">
-              <span className="flex items-center border-r border-line px-3 text-[15px] text-mute">
+            <div className="group flex rounded-xl border border-edge bg-raise transition-[border-color,background-color,box-shadow] duration-200 focus-within:border-amber/70 focus-within:bg-[#222] focus-within:shadow-[0_0_0_3px_rgb(255_193_7/0.08)] hover:border-[#4a4a4a]">
+              <span className="flex items-center gap-2 border-r border-edge pr-3 pl-4 text-[15px] text-mute">
+                <Phone
+                  size={16}
+                  className="transition-colors group-focus-within:text-amber"
+                />
                 +91
               </span>
               <input
@@ -263,7 +296,7 @@ function BookingForm() {
                 value={phone}
                 onChange={handlePhoneChange}
                 maxLength="10"
-                className="w-full min-w-0 bg-transparent px-3 py-3 text-[15px] text-white placeholder:text-dim focus:outline-none"
+                className="w-full min-w-0 bg-transparent px-3 py-3 text-[15px] text-white placeholder:text-dim"
               />
             </div>
           </div>
@@ -273,52 +306,61 @@ function BookingForm() {
           <label htmlFor="book-email" className="field-label">
             Email
           </label>
-          <input
-            id="book-email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="field"
-          />
+          <div className="group relative">
+            <Mail size={17} className={iconClass} />
+            <input
+              id="book-email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="field pl-11"
+            />
+          </div>
         </div>
 
         <div>
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <label htmlFor="book-pickup" className="text-sm font-medium text-fog">
-              Pickup address
-            </label>
+          <label htmlFor="book-pickup" className="field-label">
+            Pickup address
+          </label>
+          <div className="group relative">
+            <MapPin size={17} className={iconClass} />
+            <input
+              id="book-pickup"
+              type="text"
+              autoComplete="street-address"
+              placeholder="House, street, area"
+              value={pickup}
+              onChange={(e) => {
+                setPickup(e.target.value);
+                setCoordinates(null);
+              }}
+              className="field pr-12 pl-11"
+            />
             <button
               type="button"
               onClick={handleGetLiveLocation}
               disabled={isLocating}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-amber transition-colors hover:text-amber-soft disabled:text-mute"
+              title="Use my current location"
+              aria-label="Use my current location"
+              className="absolute inset-y-1.5 right-1.5 flex w-10 items-center justify-center rounded-lg text-amber transition-colors duration-200 hover:bg-amber/10 disabled:text-mute"
             >
               {isLocating ? (
-                <LoaderCircle size={15} className="animate-spin" />
+                <LoaderCircle size={18} className="animate-spin" />
               ) : (
-                <LocateFixed size={15} />
+                <LocateFixed size={18} />
               )}
-              Use my location
             </button>
           </div>
-          <textarea
-            id="book-pickup"
-            rows={2}
-            placeholder="House / building, street, area"
-            value={pickup}
-            onChange={(e) => {
-              setPickup(e.target.value);
-              setCoordinates(null);
-            }}
-            className="field resize-none leading-relaxed"
-          />
         </div>
 
         <div>
-          <div className="mb-3 flex items-baseline justify-between">
-            <label htmlFor="book-duration" className="text-sm font-medium text-fog">
+          <div className="mb-2 flex items-baseline justify-between">
+            <label
+              htmlFor="book-duration"
+              className="text-sm font-medium text-fog"
+            >
               Duration
             </label>
             <span className="text-sm font-semibold text-white tabular-nums">
@@ -333,23 +375,33 @@ function BookingForm() {
             step="1"
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
+            style={{ "--fill": `${fill}%` }}
             className="w-full cursor-pointer"
           />
-          <div className="mt-1 flex justify-between text-xs text-dim">
-            <span>1 hr</span>
-            <span>12 hrs</span>
-            <span>24 hrs</span>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {quickHours.map((hours) => (
+              <button
+                key={hours}
+                type="button"
+                onClick={() => setDuration(hours)}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
+                  duration === hours
+                    ? "border-white/80 bg-white text-black"
+                    : "border-edge text-mute hover:border-[#555] hover:text-white"
+                }`}
+              >
+                {hours} hrs
+              </button>
+            ))}
           </div>
         </div>
 
         <fieldset>
           <legend className="field-label">Payment</legend>
-          <div
-            role="radiogroup"
-            className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-coal p-1"
-          >
+          <div role="radiogroup" className="grid grid-cols-2 gap-3">
             {paymentOptions.map((option) => {
               const selected = paymentMethod === option.value;
+              const Icon = option.icon;
               return (
                 <button
                   key={option.value}
@@ -357,23 +409,32 @@ function BookingForm() {
                   role="radio"
                   aria-checked={selected}
                   onClick={() => setPaymentMethod(option.value)}
-                  className={`rounded-md py-2.5 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-left text-sm font-medium whitespace-nowrap transition-[border-color,background-color,color] duration-200 ${
                     selected
-                      ? "bg-raise text-white shadow-[inset_0_0_0_1px_var(--color-edge)]"
-                      : "text-mute hover:text-fog"
+                      ? "border-amber/60 bg-amber/[0.07] text-white"
+                      : "border-edge bg-raise text-mute hover:border-[#4a4a4a] hover:text-fog"
                   }`}
                 >
+                  <Icon
+                    size={18}
+                    className={`shrink-0 transition-colors ${selected ? "text-amber" : ""}`}
+                  />
                   {option.label}
                 </button>
               );
             })}
           </div>
-          <p className="mt-2 text-xs text-mute">{activePayment.hint}</p>
+          <p
+            key={paymentMethod}
+            className="animate-fade mt-2 text-xs text-mute"
+          >
+            {paymentOptions.find((o) => o.value === paymentMethod).hint}
+          </p>
         </fieldset>
       </div>
 
-      <div className="border-t border-line px-6 py-5">
-        <div className="mb-5 flex items-end justify-between">
+      <div className="border-t border-line bg-coal/60 px-6 py-5 sm:px-7">
+        <div className="mb-4 flex items-end justify-between">
           <div>
             <p className="text-sm text-fog">Total fare</p>
             <p className="text-xs text-mute tabular-nums">
@@ -381,7 +442,10 @@ function BookingForm() {
               {formatINR(HOURLY_RATE)}
             </p>
           </div>
-          <p className="text-3xl font-semibold tracking-tight text-white tabular-nums">
+          <p
+            key={fare}
+            className="animate-rise text-3xl font-semibold tracking-tight text-white tabular-nums"
+          >
             {formatINR(fare)}
           </p>
         </div>
@@ -392,11 +456,13 @@ function BookingForm() {
           className="btn-primary w-full py-3.5 text-base"
         >
           {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
-          {paymentMethod === "Online" ? "Continue to payment" : "Confirm booking"}
+          {paymentMethod === "Online"
+            ? "Continue to payment"
+            : "Confirm booking"}
         </button>
 
         {!isAuthenticated && (
-          <p className="mt-4 text-center text-sm text-mute">
+          <p className="mt-3 text-center text-sm text-mute">
             You&apos;ll need to{" "}
             <Link to="/login" className="link">
               log in
