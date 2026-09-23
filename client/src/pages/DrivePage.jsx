@@ -1,60 +1,101 @@
 import { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { Check, LoaderCircle } from "lucide-react";
+import {
+  Check,
+  LoaderCircle,
+  User,
+  Mail,
+  Phone,
+  CarFront,
+  IdCard,
+  ClipboardCheck,
+  BadgeCheck,
+  CalendarClock,
+  Hourglass,
+  ArrowRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import PageLayout from "../components/PageLayout";
+import Reveal from "../components/Reveal";
 
 const requirements = [
   "A SafarSaathi account",
   "A working email and phone number",
-  "A registered car you'll drive",
+  "A registered car you will drive",
   "A valid government driving licence",
 ];
 
 const afterApplying = [
   {
+    icon: ClipboardCheck,
     title: "We review your details",
     body: "Our team checks your licence number and vehicle by hand.",
   },
   {
+    icon: BadgeCheck,
     title: "Your account is upgraded",
     body: "Once approved, you log in as usual and get a driver dashboard.",
   },
   {
+    icon: CalendarClock,
     title: "Rides are assigned to you",
-    body: "Bookings appear on your dashboard with the pickup, hours and customer's number.",
+    body: "Bookings show up on your dashboard with the pickup, hours and customer number.",
   },
 ];
 
 const fields = [
-  { name: "name", label: "Full name", type: "text", autoComplete: "name" },
-  { name: "email", label: "Email", type: "email", autoComplete: "email" },
-  { name: "phone", label: "Phone number", type: "tel", autoComplete: "tel" },
+  {
+    name: "name",
+    label: "Full name",
+    type: "text",
+    autoComplete: "name",
+    icon: User,
+  },
+  {
+    name: "email",
+    label: "Email",
+    type: "email",
+    autoComplete: "email",
+    icon: Mail,
+  },
+  {
+    name: "phone",
+    label: "Phone number",
+    type: "tel",
+    autoComplete: "tel",
+    icon: Phone,
+  },
   {
     name: "carModel",
     label: "Car model",
     type: "text",
-    placeholder: "e.g. Maruti Swift 2020",
+    placeholder: "Maruti Swift 2020",
+    icon: CarFront,
   },
   {
     name: "licenseNumber",
     label: "Driving licence number",
     type: "text",
-    placeholder: "e.g. MH12 20190012345",
+    placeholder: "MH12 20190012345",
+    icon: IdCard,
   },
 ];
 
-function StatusPanel({ title, body, children }) {
+function StatusPanel({ icon, title, body, children }) {
+  const Icon = icon;
   return (
     <PageLayout>
-      <section className="container-page py-24 lg:py-32">
-        <div className="max-w-xl border-l-2 border-amber pl-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+      <section className="container-page flex justify-center py-24 lg:py-32">
+        <div className="animate-pop w-full max-w-lg rounded-3xl border border-line bg-raise p-8 text-center sm:p-12">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber/10 text-amber">
+            <Icon size={30} />
+          </div>
+          <h1 className="mt-6 text-2xl font-semibold text-white sm:text-3xl">
             {title}
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-mute">{body}</p>
+          <p className="mt-4 leading-relaxed text-mute">{body}</p>
           <div className="mt-8">{children}</div>
         </div>
       </section>
@@ -107,7 +148,7 @@ function DrivePage() {
     setIsSubmitting(true);
     try {
       await axios.post("/api/driver-apply", formData);
-      toast.success("Application sent. We'll be in touch.");
+      toast.success("Application sent. We will be in touch.");
       setAppStatus("pending");
     } catch (err) {
       console.error(err);
@@ -128,11 +169,16 @@ function DrivePage() {
   if (appStatus === "already_driver") {
     return (
       <StatusPanel
-        title="You're already driving with us."
+        icon={BadgeCheck}
+        title="You are already driving with us"
         body="Your account is approved. Open your dashboard to see the rides assigned to you."
       >
-        <Link to="/driver" className="btn-primary px-6 py-3.5">
+        <Link to="/driver" className="btn-primary group px-6 py-3.5">
           Go to my rides
+          <ArrowRight
+            size={18}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
         </Link>
       </StatusPanel>
     );
@@ -141,10 +187,11 @@ function DrivePage() {
   if (appStatus === "pending") {
     return (
       <StatusPanel
-        title="Your application is being reviewed."
-        body="Our team is checking your vehicle details and licence. Your account will be upgraded as soon as you're approved. Just log in again to see your driver dashboard."
+        icon={Hourglass}
+        title="Your application is being reviewed"
+        body="Our team is checking your vehicle details and licence. Once you are approved, log in again to see your driver dashboard."
       >
-        <Link to="/" className="link">
+        <Link to="/" className="btn-secondary px-6 py-3">
           Back to home
         </Link>
       </StatusPanel>
@@ -153,126 +200,156 @@ function DrivePage() {
 
   return (
     <PageLayout>
-      <section className="container-page grid gap-14 py-16 lg:grid-cols-[minmax(0,1fr)_27rem] lg:gap-20 lg:py-24">
-        <div>
-          <h1 className="max-w-xl text-4xl leading-[1.08] font-semibold tracking-tight text-white sm:text-5xl lg:text-[3.5rem]">
-            Drive with SafarSaathi, on your own schedule.
-          </h1>
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-mute">
-            Customers book drivers by the hour, so there&apos;s no chasing
-            short trips. Apply once, get verified, and take the rides that are
-            assigned to you.
-          </p>
+      <section className="bg-linear-to-b from-raise to-ink">
+        <div className="container-page grid gap-12 py-16 lg:grid-cols-[minmax(0,1fr)_28rem] lg:gap-16 lg:py-24">
+          <div className="animate-rise">
+            <h1 className="max-w-xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-[3.4rem]">
+              Drive with SafarSaathi,{" "}
+              <span className="text-amber">on your own schedule</span>
+            </h1>
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-fog/80">
+              Customers book drivers by the hour, so there is no chasing short
+              trips. Apply once, get verified and take the rides assigned to
+              you.
+            </p>
 
-          <div className="mt-14 grid gap-12 sm:grid-cols-2">
-            <div>
-              <h2 className="text-lg font-semibold text-white">
-                What you&apos;ll need
-              </h2>
-              <ul className="mt-5 space-y-3">
+            <div className="mt-12 rounded-2xl border border-line bg-panel p-6 sm:p-7">
+              <h2 className="font-semibold text-white">What you will need</h2>
+              <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                 {requirements.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-fog">
-                    <Check size={18} className="mt-0.5 shrink-0 text-amber" />
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-sm text-fog"
+                  >
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber text-black">
+                      <Check size={13} strokeWidth={3} />
+                    </span>
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
+          </div>
 
-            <div>
-              <h2 className="text-lg font-semibold text-white">
-                After you apply
-              </h2>
-              <ol className="mt-5 space-y-5">
-                {afterApplying.map((step, index) => (
-                  <li key={step.title} className="grid grid-cols-[1.5rem_1fr]">
-                    <span className="font-semibold text-amber tabular-nums">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-medium text-white">{step.title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-mute">
-                        {step.body}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </div>
+          <div id="apply" className="animate-rise [animation-delay:150ms]">
+            {user ? (
+              <form
+                onSubmit={handleSubmit}
+                className="overflow-hidden rounded-2xl border border-line bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)]"
+              >
+                <div className="px-6 pt-6 sm:px-7">
+                  <h2 className="text-xl font-semibold text-white">
+                    Driver application
+                  </h2>
+                  {appStatus === "rejected" ? (
+                    <p className="mt-3 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-fog">
+                      Your last application was not approved. Check your details
+                      and feel free to apply again.
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm text-mute">
+                      Takes about two minutes.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-5 px-6 py-6 sm:px-7">
+                  {fields.map((field) => {
+                    const Icon = field.icon;
+                    return (
+                      <div key={field.name}>
+                        <label
+                          htmlFor={`apply-${field.name}`}
+                          className="field-label"
+                        >
+                          {field.label}
+                        </label>
+                        <div className="group relative">
+                          <Icon
+                            size={17}
+                            className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+                          />
+                          <input
+                            id={`apply-${field.name}`}
+                            type={field.type}
+                            name={field.name}
+                            autoComplete={field.autoComplete}
+                            placeholder={field.placeholder}
+                            value={formData[field.name]}
+                            onChange={handleChange}
+                            className="field pl-11"
+                            required
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="border-t border-line bg-coal/60 px-6 py-5 sm:px-7">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary w-full py-3.5 text-base"
+                  >
+                    {isSubmitting && (
+                      <LoaderCircle size={18} className="animate-spin" />
+                    )}
+                    Submit application
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="rounded-2xl border border-line bg-panel p-7 sm:p-8">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber/10 text-amber">
+                  <User size={22} />
+                </div>
+                <h2 className="mt-5 text-xl font-semibold text-white">
+                  Start with an account
+                </h2>
+                <p className="mt-3 leading-relaxed text-mute">
+                  Applications are linked to your SafarSaathi account, so we can
+                  upgrade it once you are approved.
+                </p>
+                <div className="mt-8 flex flex-col gap-3">
+                  <Link to="/signup" className="btn-primary py-3.5">
+                    Create an account
+                  </Link>
+                  <Link to="/login" className="btn-secondary py-3.5">
+                    I already have an account
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
+      </section>
 
-        <div id="apply">
-          {user ? (
-            <form
-              onSubmit={handleSubmit}
-              className="rounded-xl border border-line bg-panel"
-            >
-              <div className="border-b border-line px-6 py-5">
-                <h2 className="text-lg font-semibold text-white">
-                  Driver application
-                </h2>
-                {appStatus === "rejected" && (
-                  <p className="mt-2 text-sm text-mute">
-                    Your last application wasn&apos;t approved. Check your
-                    details and feel free to apply again.
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-5 px-6 py-6">
-                {fields.map((field) => (
-                  <div key={field.name}>
-                    <label htmlFor={`apply-${field.name}`} className="field-label">
-                      {field.label}
-                    </label>
-                    <input
-                      id={`apply-${field.name}`}
-                      type={field.type}
-                      name={field.name}
-                      autoComplete={field.autoComplete}
-                      placeholder={field.placeholder}
-                      value={formData[field.name]}
-                      onChange={handleChange}
-                      className="field"
-                      required
-                    />
+      <section className="container-page pb-20 lg:pb-28">
+        <Reveal>
+          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+            What happens after you apply
+          </h2>
+        </Reveal>
+        <div className="mt-10 grid gap-4 sm:gap-5 md:grid-cols-3">
+          {afterApplying.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <Reveal key={step.title} delay={index * 90}>
+                <div className="group card card-hover h-full p-6 sm:p-7">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-line text-amber transition-colors duration-300 group-hover:bg-amber group-hover:text-black">
+                    <Icon size={22} />
                   </div>
-                ))}
-              </div>
-
-              <div className="border-t border-line px-6 py-5">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn-primary w-full py-3.5 text-base"
-                >
-                  {isSubmitting && (
-                    <LoaderCircle size={18} className="animate-spin" />
-                  )}
-                  Submit application
-                </button>
-              </div>
-            </form>
-          ) : (
-            <div className="rounded-xl border border-line bg-panel p-8">
-              <h2 className="text-xl font-semibold text-white">
-                Start with an account
-              </h2>
-              <p className="mt-3 leading-relaxed text-mute">
-                Applications are linked to your SafarSaathi account, so we can
-                upgrade it once you&apos;re approved.
-              </p>
-              <div className="mt-8 flex flex-col gap-3">
-                <Link to="/signup" className="btn-primary py-3.5">
-                  Create an account
-                </Link>
-                <Link to="/login" className="btn-secondary py-3.5">
-                  I already have an account
-                </Link>
-              </div>
-            </div>
-          )}
+                  <h3 className="mt-5 text-lg font-semibold text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-mute">
+                    {step.body}
+                  </p>
+                </div>
+              </Reveal>
+            );
+          })}
         </div>
       </section>
     </PageLayout>

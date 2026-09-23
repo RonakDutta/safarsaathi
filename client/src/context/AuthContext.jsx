@@ -1,69 +1,46 @@
-import React, { createContext, useState, useEffect } from "react";
+import { useState } from "react";
 import axios from "../api/axios";
 import toast from "react-hot-toast";
+import { AuthContext } from "./authContext";
 
-// 1. Create the Context
-export const AuthContext = createContext();
+// Restore the session saved by a previous login, if any.
+const readStoredUser = () => {
+  try {
+    const token = localStorage.getItem("token");
+    const stored = localStorage.getItem("user");
+    return token && stored ? JSON.parse(stored) : null;
+  } catch {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return null;
+  }
+};
 
-// 2. Create the Provider Component
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(readStoredUser);
+  const isAuthenticated = Boolean(user);
 
-  // --- A. CHECK IF USER IS ALREADY LOGGED IN (On Refresh) ---
-  useEffect(() => {
-    const checkLoggedIn = async () => {
-      const token = localStorage.getItem("token");
+  const saveSession = (data) => {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    setUser(data.user);
+  };
 
-      if (token) {
-        try {
-          // We don't have a /verify route yet, so we just decode the LocalStorage for now
-          // Later we will add a backend verify route for extra security
-          const storedUser = localStorage.getItem("user");
-          if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            setIsAuthenticated(true);
-          }
-        } catch (err) {
-          console.error("Token verification failed");
-          localStorage.removeItem("token");
-          localStorage.removeItem("user");
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      }
-      setLoading(false);
-    };
-
-    checkLoggedIn();
-  }, []);
-
-  // --- B. LOGIN FUNCTION ---
+  // Resolves to the logged in user, or null on failure
   const login = async (email, password) => {
     try {
       const response = await axios.post("/auth/login", { email, password });
-
-      if (response.data.token) {
-        // 1. Save to Local Storage
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-
-        // 2. Update State
-        setIsAuthenticated(true);
-        setUser(response.data.user);
-
-        toast.success("Login Successful!");
-        return true;
-      }
+      if (!response.data.token) throw new Error("No token returned");
+      saveSession(response.data);
+      toast.success("Logged in");
+      return response.data.user;
     } catch (err) {
-      console.error(err.response?.data);
-      toast.error(err.response?.data?.error || "Login Failed");
-      return false;
+      console.error(err.response?.data || err);
+      toast.error(err.response?.data?.error || "Login failed");
+      return null;
     }
   };
 
-  // --- C. REGISTER FUNCTION ---
   const register = async (name, email, password, role) => {
     try {
       const response = await axios.post("/auth/register", {
@@ -72,46 +49,29 @@ export const AuthProvider = ({ children }) => {
         password,
         role: role || "customer",
       });
-
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-
-        setIsAuthenticated(true);
-        setUser(response.data.user);
-
-        toast.success("Account Created!");
-        return true;
-      }
+      if (!response.data.token) throw new Error("No token returned");
+      saveSession(response.data);
+      toast.success("Account created");
+      return response.data.user;
     } catch (err) {
-      console.error(err.response?.data);
-      toast.error(err.response?.data?.error || "Signup Failed");
-      return false;
+      console.error(err.response?.data || err);
+      toast.error(err.response?.data?.error || "Sign up failed");
+      return null;
     }
   };
 
-  // --- D. LOGOUT FUNCTION ---
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setIsAuthenticated(false);
     setUser(null);
-    toast.success("Logged out successfully");
+    toast.success("Logged out");
   };
 
-  // --- E. EXPORT VALUES ---
   return (
     <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        user,
-        loading,
-        login,
-        register,
-        logout,
-      }}
+      value={{ isAuthenticated, user, loading: false, login, register, logout }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

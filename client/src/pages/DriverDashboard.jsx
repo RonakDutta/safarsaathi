@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Car, History, MapPin, Phone, ExternalLink } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import DashboardShell, {
   PageHeader,
   StatStrip,
@@ -30,12 +30,14 @@ function PaymentNote({ booking }) {
 
 function ActiveRide({ booking, onComplete, onCancel }) {
   return (
-    <article className="animate-rise overflow-hidden rounded-xl border border-line bg-panel">
+    <article className="animate-rise overflow-hidden rounded-2xl border border-line bg-panel">
       <div className="flex flex-col gap-1 border-b border-line px-5 py-4 sm:flex-row sm:items-baseline sm:justify-between sm:px-6">
-        <h3 className="text-lg font-semibold text-white">{booking.user_name}</h3>
+        <h3 className="text-lg font-semibold text-white">
+          {booking.user_name}
+        </h3>
         <p className="text-sm text-mute">
           Booking #{booking.booking_id}
-          {booking.created_at && <> &middot; {formatDate(booking.created_at)}</>}
+          {booking.created_at && <>, {formatDate(booking.created_at)}</>}
         </p>
       </div>
 
@@ -92,7 +94,7 @@ function ActiveRide({ booking, onComplete, onCancel }) {
 
 function PastRides({ rides }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-panel">
+    <div className="overflow-hidden rounded-2xl border border-line bg-panel">
       <div className="hidden grid-cols-[1.5fr_1fr_1fr_auto] gap-6 border-b border-line px-6 py-3 text-xs text-mute md:grid">
         <span>Customer</span>
         <span>Date</span>
@@ -106,19 +108,21 @@ function PastRides({ rides }) {
             className="grid grid-cols-[1fr_auto] gap-x-6 px-5 py-4 md:grid-cols-[1.5fr_1fr_1fr_auto] md:items-center md:px-6"
           >
             <div className="min-w-0">
-              <p className="truncate font-medium text-white">{ride.user_name}</p>
+              <p className="truncate font-medium text-white">
+                {ride.user_name}
+              </p>
               <p className="truncate text-sm text-mute">
                 {ride.pickup_location}
               </p>
               <p className="mt-1 text-sm text-mute md:hidden">
-                {formatDate(ride.created_at)} &middot; {hoursLabel(ride.duration)}
+                {formatDate(ride.created_at)}, {hoursLabel(ride.duration)}
               </p>
             </div>
             <p className="hidden text-sm text-mute md:block">
               {formatDate(ride.created_at)}
             </p>
             <p className="hidden text-sm text-mute md:block">
-              {hoursLabel(ride.duration)} &middot; {ride.payment_method}
+              {hoursLabel(ride.duration)}, {ride.payment_method}
             </p>
             <p className="text-right font-semibold text-white tabular-nums">
               {formatINR(ride.amount || ride.duration * HOURLY_RATE)}
@@ -215,7 +219,12 @@ const DriverDashboard = () => {
       count: activeRides.length,
       highlight: true,
     },
-    { key: "history", label: "Ride history", icon: History, count: pastRides.length },
+    {
+      key: "history",
+      label: "Ride history",
+      icon: History,
+      count: pastRides.length,
+    },
   ];
 
   const firstName = (user?.name || user?.full_name || "").split(" ")[0];
@@ -230,16 +239,22 @@ const DriverDashboard = () => {
       onLogout={handleLogout}
     >
       {activeTab === "active" ? (
-        <>
+        <div key="active" className="animate-rise">
           <PageHeader
-            title={firstName ? `Hi ${firstName}, here are your rides` : "Your rides"}
+            title={
+              firstName ? `Hi ${firstName}, here are your rides` : "Your rides"
+            }
             description="Rides assigned to you by the SafarSaathi team."
           />
 
           <div className="mb-10">
             <StatStrip
               stats={[
-                { label: "Active now", value: activeRides.length, accent: true },
+                {
+                  label: "Active now",
+                  value: activeRides.length,
+                  accent: true,
+                },
                 { label: "Completed", value: completedCount },
                 { label: "Hours driven", value: hoursDriven },
               ]}
@@ -262,9 +277,9 @@ const DriverDashboard = () => {
               />
             )}
           </div>
-        </>
+        </div>
       ) : (
-        <>
+        <div key="history" className="animate-rise">
           <PageHeader
             title="Ride history"
             description={`${completedCount} completed ${
@@ -279,7 +294,7 @@ const DriverDashboard = () => {
               body="Rides you finish with a customer PIN will be listed here."
             />
           )}
-        </>
+        </div>
       )}
 
       <Dialog
@@ -305,7 +320,11 @@ const DriverDashboard = () => {
             placeholder="0000"
           />
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button type="button" onClick={closePinModal} className="btn-secondary">
+            <button
+              type="button"
+              onClick={closePinModal}
+              className="btn-secondary"
+            >
               Not yet
             </button>
             <button

@@ -17,14 +17,14 @@ function Dialog({ open, onClose, title, description, children }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 sm:items-center sm:p-4"
+      className="animate-fade fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className="animate-rise w-full max-w-md rounded-t-xl border border-line bg-panel p-6 sm:rounded-xl sm:p-8"
+        className="animate-pop w-full max-w-md rounded-t-2xl border border-line bg-panel p-6 shadow-2xl sm:rounded-2xl sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <h2 id="dialog-title" className="text-xl font-semibold text-white">
@@ -32,14 +32,16 @@ function Dialog({ open, onClose, title, description, children }) {
           </h2>
           <button
             onClick={onClose}
-            className="-mt-1 -mr-2 p-2 text-mute transition-colors hover:text-white"
+            className="-mt-1 -mr-2 rounded-full p-2 text-mute transition-[color,background-color,transform] duration-300 hover:rotate-90 hover:bg-white/5 hover:text-white"
             aria-label="Close"
           >
             <X size={20} />
           </button>
         </div>
         {description && (
-          <p className="mt-2 text-sm leading-relaxed text-mute">{description}</p>
+          <p className="mt-2 text-sm leading-relaxed text-mute">
+            {description}
+          </p>
         )}
         <div className="mt-6">{children}</div>
       </div>
@@ -57,7 +59,12 @@ export function ConfirmDialog({
   cancelLabel = "Keep it",
 }) {
   return (
-    <Dialog open={open} onClose={onClose} title={title} description={description}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={title}
+      description={description}
+    >
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button onClick={onClose} className="btn-secondary">
           {cancelLabel}

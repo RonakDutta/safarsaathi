@@ -1,8 +1,8 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Mail, User } from "lucide-react";
 import toast from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import AuthLayout from "../components/AuthLayout";
 import PasswordField from "../components/PasswordField";
 
@@ -24,10 +24,10 @@ const Signup = () => {
     }
 
     setIsSubmitting(true);
-    const success = await register(name, email, password, "customer");
+    const created = await register(name, email, password, "customer");
     setIsSubmitting(false);
 
-    if (success) {
+    if (created) {
       navigate("/");
     }
   };
@@ -35,7 +35,7 @@ const Signup = () => {
   return (
     <AuthLayout
       title="Create your account"
-      description="You'll need one to book a ride or apply to drive."
+      description="You need one to book a ride or apply to drive."
       footer={
         <>
           Already have an account?{" "}
@@ -50,32 +50,44 @@ const Signup = () => {
           <label htmlFor="signup-name" className="field-label">
             Full name
           </label>
-          <input
-            id="signup-name"
-            type="text"
-            autoComplete="name"
-            placeholder="As you'd like drivers to see it"
-            className="field"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+          <div className="group relative">
+            <User
+              size={17}
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+            />
+            <input
+              id="signup-name"
+              type="text"
+              autoComplete="name"
+              placeholder="Your full name"
+              className="field pl-11"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
         </div>
 
         <div>
           <label htmlFor="signup-email" className="field-label">
             Email
           </label>
-          <input
-            id="signup-email"
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            className="field"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <div className="group relative">
+            <Mail
+              size={17}
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+            />
+            <input
+              id="signup-email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="field pl-11"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
         </div>
 
         <div>

@@ -1,9 +1,16 @@
 import { useEffect, useState, useContext, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutGrid, Ticket, UserCheck, Users, Trash2, ArrowRight } from "lucide-react";
+import {
+  LayoutGrid,
+  Ticket,
+  UserCheck,
+  Users,
+  Trash2,
+  ArrowRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/authContext";
 import DashboardShell, {
   PageHeader,
   StatStrip,
@@ -31,10 +38,13 @@ function TextButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:text-amber-soft"
+      className="group inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:text-amber-soft"
     >
       {children}
-      <ArrowRight size={14} />
+      <ArrowRight
+        size={14}
+        className="transition-transform duration-200 group-hover:translate-x-0.5"
+      />
     </button>
   );
 }
@@ -48,7 +58,7 @@ function Tabs({ tabs, value, onChange }) {
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`-mb-px border-b-2 pb-3 text-sm font-medium transition-colors ${
+          className={`-mb-px border-b-2 pb-3 text-sm font-medium transition-colors duration-200 ${
             value === tab.value
               ? "border-amber text-white"
               : "border-transparent text-mute hover:text-white"
@@ -236,10 +246,20 @@ const AdminDashboard = () => {
 
           <StatStrip
             stats={[
-              { label: "Revenue", value: formatINR(stats.revenue), accent: true },
-              { label: "Total bookings", value: Number(stats.totalBookings) || 0 },
+              {
+                label: "Revenue",
+                value: formatINR(stats.revenue),
+                accent: true,
+              },
+              {
+                label: "Total bookings",
+                value: Number(stats.totalBookings) || 0,
+              },
               { label: "Drivers", value: Number(stats.activeDrivers) || 0 },
-              { label: "Applications to review", value: Number(stats.pendingApps) || 0 },
+              {
+                label: "Applications to review",
+                value: Number(stats.pendingApps) || 0,
+              },
             ]}
           />
 
@@ -256,11 +276,11 @@ const AdminDashboard = () => {
                 }
               />
               {pendingBookings.length > 0 ? (
-                <ul className="divide-y divide-line rounded-xl border border-line bg-panel">
+                <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
                   {pendingBookings.slice(0, 5).map((b) => (
                     <li
                       key={b.booking_id}
-                      className="flex items-center justify-between gap-4 px-5 py-4"
+                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-200 hover:bg-white/[0.02]"
                     >
                       <div className="min-w-0">
                         <p className="truncate font-medium text-white">
@@ -297,7 +317,7 @@ const AdminDashboard = () => {
                 }
               />
               {pendingApps.length > 0 ? (
-                <ul className="divide-y divide-line rounded-xl border border-line bg-panel">
+                <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
                   {pendingApps.slice(0, 5).map((app) => (
                     <li key={app.application_id} className="px-5 py-4">
                       <p className="font-medium text-white">{app.full_name}</p>
@@ -321,7 +341,7 @@ const AdminDashboard = () => {
               }
             />
             {bookings.length > 0 ? (
-              <ul className="divide-y divide-line rounded-xl border border-line bg-panel">
+              <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
                 {bookings.slice(0, 6).map((b) => {
                   const status = getStatus(b.status);
                   return (
@@ -334,10 +354,10 @@ const AdminDashboard = () => {
                         {b.pickup_location}
                       </p>
                       <p className="hidden text-sm text-mute md:block">
-                        {hoursLabel(b.duration)} &middot; {b.payment_method}
+                        {hoursLabel(b.duration)}, {b.payment_method}
                       </p>
-                      <p className={`col-start-2 row-start-1 text-right text-sm font-medium md:col-start-auto md:row-start-auto ${status.className}`}>
-                        {status.label}
+                      <p className="col-start-2 row-start-1 text-right md:col-start-auto md:row-start-auto">
+                        <span className={status.className}>{status.label}</span>
                       </p>
                     </li>
                   );
@@ -358,13 +378,21 @@ const AdminDashboard = () => {
             value={bookingView}
             onChange={setBookingView}
             tabs={[
-              { value: "pending", label: "Needs a driver", count: pendingBookings.length },
-              { value: "history", label: "Assigned & completed", count: otherBookings.length },
+              {
+                value: "pending",
+                label: "Needs a driver",
+                count: pendingBookings.length,
+              },
+              {
+                value: "history",
+                label: "Assigned and completed",
+                count: otherBookings.length,
+              },
             ]}
           />
 
           {visibleBookings.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-line bg-panel">
+            <div className="overflow-hidden rounded-2xl border border-line bg-panel">
               <div className="hidden grid-cols-[1.1fr_1.6fr_1fr_1.5fr] gap-6 border-b border-line px-6 py-3 text-xs text-mute lg:grid">
                 <span>Customer</span>
                 <span>Pickup</span>
@@ -386,7 +414,10 @@ const AdminDashboard = () => {
                           {b.user_name}
                         </p>
                         <p className="text-sm text-mute tabular-nums">
-                          <a href={`tel:+${b.phone}`} className="hover:text-white">
+                          <a
+                            href={`tel:+${b.phone}`}
+                            className="hover:text-white"
+                          >
                             +{b.phone}
                           </a>
                         </p>
@@ -396,10 +427,10 @@ const AdminDashboard = () => {
                       </p>
                       <div className="text-sm">
                         <p className="text-fog">
-                          {hoursLabel(b.duration)} &middot; {b.payment_method}
+                          {hoursLabel(b.duration)}, {b.payment_method}
                         </p>
                         <p className="text-mute">
-                          #{b.booking_id} &middot; {formatDate(b.created_at)}
+                          #{b.booking_id}, {formatDate(b.created_at)}
                         </p>
                       </div>
 
@@ -439,8 +470,10 @@ const AdminDashboard = () => {
                           </button>
                         </div>
                       ) : (
-                        <p className={`text-sm font-medium lg:text-right ${status.className}`}>
-                          {status.label}
+                        <p className="lg:text-right">
+                          <span className={status.className}>
+                            {status.label}
+                          </span>
                         </p>
                       )}
                     </li>
@@ -468,7 +501,7 @@ const AdminDashboard = () => {
             description="Approving an application upgrades that person's account to a driver account."
           />
           {pendingApps.length > 0 ? (
-            <ul className="divide-y divide-line rounded-xl border border-line bg-panel">
+            <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
               {pendingApps.map((app) => (
                 <li
                   key={app.application_id}
@@ -480,13 +513,17 @@ const AdminDashboard = () => {
                     </p>
                     <p className="truncate text-sm text-mute">
                       {app.email}
-                      {app.applied_at && <> &middot; applied {formatDay(app.applied_at)}</>}
+                      {app.applied_at && (
+                        <>, applied {formatDay(app.applied_at)}</>
+                      )}
                     </p>
                   </div>
                   <dl className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <dt className="text-mute">Phone</dt>
-                      <dd className="mt-0.5 text-fog tabular-nums">{app.phone}</dd>
+                      <dd className="mt-0.5 text-fog tabular-nums">
+                        {app.phone}
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-mute">Car</dt>
@@ -533,7 +570,7 @@ const AdminDashboard = () => {
             description="Everyone approved to take rides, sorted by completed trips."
           />
           {driverList.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-line bg-panel">
+            <div className="overflow-hidden rounded-2xl border border-line bg-panel">
               <div className="hidden grid-cols-[1.2fr_1.5fr_1.3fr_5rem] gap-6 border-b border-line px-6 py-3 text-xs text-mute md:grid">
                 <span>Driver</span>
                 <span>Contact</span>
@@ -589,7 +626,7 @@ const AdminDashboard = () => {
         onClose={closeDeleteDialog}
         onConfirm={handleDeleteBooking}
         title="Delete this booking?"
-        description="The customer's request will be removed permanently. This can't be undone."
+        description="The customer's request will be removed for good. This cannot be undone."
         confirmLabel="Delete booking"
       />
     </DashboardShell>
