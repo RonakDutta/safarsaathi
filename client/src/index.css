@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-/* SafarSaathi palette, named so every page shares it. */
+/* SafarSaathi palette, named so every page shares it.
+   Black and amber, like the kaali-peeli taxis the brand grew up with. */
 @theme {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
 
@@ -34,11 +35,29 @@ html {
 
 body {
   min-width: 320px;
+  background-color: var(--color-ink);
+  overflow-x: hidden;
 }
 
 ::selection {
   background: var(--color-amber);
   color: #000;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+  border: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-edge);
 }
 
 /* Keyboard focus ring for links and buttons only. Form fields show focus
@@ -66,49 +85,59 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238c8c8c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  padding-right: 2.5rem !important;
+}
+
 /* Range slider: thin track that fills amber up to the thumb.
    The component sets --fill as a percentage. */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 22px;
+  height: 28px;
   background: transparent;
 }
 input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
   background: linear-gradient(
     to right,
     var(--color-amber) var(--fill, 0%),
-    var(--color-edge) var(--fill, 0%)
+    var(--color-line) var(--fill, 0%)
   );
 }
 input[type="range"]::-moz-range-track {
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  background: var(--color-edge);
+  background: var(--color-line);
 }
 input[type="range"]::-moz-range-progress {
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
   background: var(--color-amber);
 }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  margin-top: -8px;
-  height: 20px;
-  width: 20px;
+  margin-top: -9px;
+  height: 24px;
+  width: 24px;
   border-radius: 999px;
-  background: #fff;
-  border: 4px solid var(--color-amber);
+  background: #000;
+  border: 5px solid var(--color-amber);
+  box-shadow: 0 0 0 6px rgb(255 193 7 / 0.12);
   transition: transform 0.15s ease;
 }
 input[type="range"]::-moz-range-thumb {
-  height: 12px;
-  width: 12px;
+  height: 14px;
+  width: 14px;
   border-radius: 999px;
-  background: #fff;
-  border: 4px solid var(--color-amber);
+  background: #000;
+  border: 5px solid var(--color-amber);
+  box-shadow: 0 0 0 6px rgb(255 193 7 / 0.12);
   transition: transform 0.15s ease;
 }
 input[type="range"]:active::-webkit-slider-thumb {
@@ -121,11 +150,13 @@ input[type="range"]:focus-visible {
   outline: none;
 }
 input[type="range"]:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 4px rgb(255 193 7 / 0.25);
+  box-shadow: 0 0 0 8px rgb(255 193 7 / 0.3);
 }
 
+/* ---------- Building blocks ---------- */
+
 @utility field {
-  @apply w-full rounded-xl border border-edge bg-raise px-4 py-3 text-[15px] text-white transition-[border-color,background-color,box-shadow] duration-200 placeholder:text-dim hover:border-[#4a4a4a] focus:border-amber/70 focus:bg-[#222] focus:shadow-[0_0_0_3px_rgb(255_193_7/0.08)] disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-edge;
+  @apply w-full rounded-2xl border border-line bg-coal px-4 py-3.5 text-[15px] text-white transition-[border-color,background-color,box-shadow] duration-200 placeholder:text-dim hover:border-edge focus:border-amber/70 focus:bg-black focus:shadow-[0_0_0_4px_rgb(255_193_7/0.1)] disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-line;
 }
 
 @utility field-label {
@@ -133,19 +164,19 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-[background-color,border-color,color,transform,box-shadow] duration-200 ease-out active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
 }
 
 @utility btn-primary {
-  @apply btn bg-amber text-black hover:-translate-y-0.5 hover:bg-amber-soft hover:shadow-[0_8px_24px_-8px_rgb(255_193_7/0.45)];
+  @apply btn bg-amber text-black shadow-[0_10px_30px_-10px_rgb(255_193_7/0.6)] hover:-translate-y-0.5 hover:bg-amber-soft hover:shadow-[0_16px_40px_-12px_rgb(255_193_7/0.75)];
 }
 
 @utility btn-secondary {
-  @apply btn border border-edge bg-transparent text-white hover:border-[#555] hover:bg-raise;
+  @apply btn border border-white/15 bg-white/[0.03] text-white backdrop-blur-sm hover:border-white/40 hover:bg-white/[0.08];
 }
 
 @utility btn-danger {
-  @apply btn border border-line bg-transparent text-danger hover:border-danger/60 hover:bg-danger/10;
+  @apply btn border border-danger/30 bg-danger/[0.06] text-danger hover:border-danger/60 hover:bg-danger/15;
 }
 
 @utility link {
@@ -153,22 +184,137 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 }
 
 @utility container-page {
-  @apply mx-auto w-full max-w-6xl px-5 md:px-8;
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility surface {
+  @apply rounded-3xl border border-white/[0.07] bg-panel;
 }
 
 @utility card {
-  @apply rounded-2xl border border-line bg-raise transition-[transform,border-color,box-shadow] duration-300 ease-out;
+  @apply surface transition-[transform,border-color,box-shadow] duration-300 ease-out;
 }
 
 @utility card-hover {
-  @apply hover:-translate-y-1.5 hover:border-amber/50 hover:shadow-[0_18px_40px_-12px_rgb(0_0_0/0.7)];
+  @apply hover:-translate-y-1 hover:border-amber/40 hover:shadow-[0_24px_60px_-24px_rgb(255_193_7/0.25)];
 }
 
-/* Motion */
+@utility chip {
+  @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-fog backdrop-blur-sm;
+}
+
+@utility display {
+  @apply font-bold tracking-[-0.035em] text-white;
+}
+
+/* Taxi checker stripe. Height sets how many rows show. */
+.checker {
+  --sq: 12px;
+  background-color: #000;
+  background-image: conic-gradient(
+    var(--color-amber) 25%,
+    #000 0 50%,
+    var(--color-amber) 0 75%,
+    #000 0
+  );
+  background-size: calc(var(--sq) * 2) calc(var(--sq) * 2);
+}
+
+/* Faint map grid behind hero sections */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.mask-fade {
+  mask-image: radial-gradient(ellipse at center, #000 35%, transparent 75%);
+}
+
+.mask-fade-b {
+  mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+
+/* Dashed road centre line. Horizontal by default. */
+.lane {
+  background-image: linear-gradient(
+    to right,
+    var(--color-amber) 0 55%,
+    transparent 55%
+  );
+  background-size: 28px 100%;
+  animation: lane-x 1.4s linear infinite;
+}
+.lane-y {
+  background-image: linear-gradient(
+    to bottom,
+    var(--color-amber) 0 55%,
+    transparent 55%
+  );
+  background-size: 100% 28px;
+  animation: lane-y 1.4s linear infinite;
+}
+
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.12);
+}
+
+/* Grayscale photo washed in amber */
+.duotone {
+  filter: grayscale(1) contrast(1.1) brightness(0.7);
+}
+
+/* Ticket perforation: notches on both sides with a dashed tear line */
+.perforation {
+  position: relative;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--color-edge) 0 50%,
+    transparent 50%
+  );
+  background-size: 12px 1px;
+}
+.perforation::before,
+.perforation::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--notch, #000);
+  border: 1px solid rgb(255 255 255 / 0.07);
+  transform: translateY(-50%);
+}
+.perforation::before {
+  left: -12px;
+  clip-path: inset(0 0 0 50%);
+}
+.perforation::after {
+  right: -12px;
+  clip-path: inset(0 50% 0 0);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ---------- Motion ---------- */
+
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -188,7 +334,7 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 @keyframes pop {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateY(16px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -196,17 +342,69 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   }
 }
 
-@keyframes slow-zoom {
+@keyframes sheet {
   from {
-    transform: scale(1.08);
+    transform: translateY(100%);
   }
   to {
-    transform: scale(1);
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes lane-x {
+  to {
+    background-position: -28px 0;
+  }
+}
+
+@keyframes lane-y {
+  to {
+    background-position: 0 28px;
+  }
+}
+
+@keyframes drive-x {
+  0% {
+    left: 0%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes drive-y {
+  0% {
+    top: 0%;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
 
 .animate-rise {
-  animation: rise 0.5s var(--ease-out-soft) both;
+  animation: rise 0.6s var(--ease-out-soft) both;
 }
 
 .animate-fade {
@@ -214,21 +412,48 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 }
 
 .animate-pop {
-  animation: pop 0.35s var(--ease-out-soft) both;
+  animation: pop 0.4s var(--ease-out-soft) both;
 }
 
-.animate-slow-zoom {
-  animation: slow-zoom 1.6s var(--ease-out-soft) both;
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1s steps(1) infinite;
+}
+
+.route-flow {
+  animation: route 1.6s linear infinite;
+}
+
+@keyframes route {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+.sheet-sm {
+  animation: sheet 0.4s var(--ease-out-soft) both;
+}
+@media (min-width: 640px) {
+  .sheet-sm {
+    animation: pop 0.4s var(--ease-out-soft) both;
+  }
 }
 
 /* Scroll reveal. <Reveal> adds .is-visible once the element enters the
    viewport; --delay staggers siblings. */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
+  transform: translateY(28px);
   transition:
-    opacity 0.7s var(--ease-out-soft),
-    transform 0.7s var(--ease-out-soft);
+    opacity 0.8s var(--ease-out-soft),
+    transform 0.8s var(--ease-out-soft);
   transition-delay: var(--delay, 0ms);
 }
 

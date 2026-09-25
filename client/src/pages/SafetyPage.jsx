@@ -7,10 +7,12 @@ import {
   KeyRound,
   ShieldCheck,
   Lock,
+  MessageCircle,
 } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import ClosingCta from "../components/ClosingCta";
 import Reveal from "../components/Reveal";
+import { PageHero, SectionHeading } from "../components/Section";
 import { images } from "../lib/images";
 
 const journey = [
@@ -82,23 +84,23 @@ const faqData = [
 function FaqItem({ item, isOpen, onToggle, id }) {
   return (
     <div
-      className={`rounded-2xl border transition-colors duration-300 ${
+      className={`rounded-3xl border transition-colors duration-300 ${
         isOpen
-          ? "border-edge bg-raise"
-          : "border-line bg-panel hover:border-edge"
+          ? "border-amber/30 bg-panel"
+          : "border-white/[0.07] bg-transparent hover:border-white/15"
       }`}
     >
       <h3>
         <button
-          className="flex w-full items-center justify-between gap-6 px-6 py-5 text-left font-medium text-white"
+          className="flex w-full items-center justify-between gap-6 px-5 py-5 text-left font-semibold text-white sm:px-7 sm:py-6 sm:text-lg"
           onClick={onToggle}
           aria-expanded={isOpen}
           aria-controls={`${id}-panel`}
         >
           {item.question}
           <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-300 ${
-              isOpen ? "rotate-45 bg-amber text-black" : "bg-line text-amber"
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-300 ${
+              isOpen ? "rotate-45 bg-amber text-black" : "bg-white/[0.06] text-amber"
             }`}
           >
             <Plus size={18} />
@@ -112,7 +114,9 @@ function FaqItem({ item, isOpen, onToggle, id }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="px-6 pb-6 leading-relaxed text-mute">{item.answer}</p>
+          <p className="px-5 pb-6 leading-relaxed text-mute sm:px-7">
+            {item.answer}
+          </p>
         </div>
       </div>
     </div>
@@ -124,96 +128,104 @@ function SafetyPage() {
 
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="bg-linear-to-b from-raise to-ink">
-        <div className="container-page animate-rise py-20 text-center lg:py-28">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber/10 text-amber">
-            <ShieldCheck size={30} />
-          </div>
-          <h1 className="mx-auto mt-8 max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl">
-            Safety checked by <span className="text-amber">people</span>, not
-            left to an algorithm
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-fog/80">
-            Every driver is vetted by hand, every ride is assigned by our team,
-            and every trip ends only when you say so.
-          </p>
+      <PageHero
+        title={
+          <>
+            Checked by <span className="text-amber">people.</span>
+            <br className="hidden sm:block" /> Not left to an algorithm.
+          </>
+        }
+        body="Every driver is vetted by hand, every ride is assigned by our team, and every trip ends only when you say so."
+      />
+
+      {/* Journey */}
+      <section className="container-page pb-20 lg:pb-32">
+        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+          <SectionHeading
+            title="Four checkpoints on every ride."
+            body="Here is who touches your booking, from the moment a driver signs up to the moment you step out."
+            className="lg:sticky lg:top-32 lg:self-start"
+          />
+
+          <ol className="relative">
+            <span className="absolute top-6 bottom-6 left-[1.6rem] w-px bg-linear-to-b from-amber via-amber/40 to-transparent sm:left-8" />
+            {journey.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <Reveal
+                  as="li"
+                  key={step.title}
+                  delay={index * 90}
+                  className="relative flex gap-5 pb-10 last:pb-0 sm:gap-7"
+                >
+                  <span className="relative z-10 flex h-[3.2rem] w-[3.2rem] shrink-0 items-center justify-center rounded-2xl border border-amber/30 bg-black text-amber sm:h-16 sm:w-16">
+                    <Icon size={22} />
+                  </span>
+                  <div className="card flex-1 p-5 sm:p-7">
+                    <h3 className="text-lg font-semibold text-white sm:text-xl">
+                      {step.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-mute sm:text-base">
+                      {step.body}
+                    </p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </ol>
         </div>
       </section>
 
-      {/* Journey */}
-      <section className="container-page pb-20 lg:pb-28">
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-          {journey.map((step, index) => {
-            const Icon = step.icon;
+      {/* Detail tiles */}
+      <section className="border-y border-white/[0.06] bg-coal py-20 lg:py-28">
+        <div className="container-page grid gap-4 md:grid-cols-2 lg:gap-5">
+          {details.map((detail, index) => {
+            const Icon = detail.icon;
             return (
-              <Reveal key={step.title} delay={index * 90}>
-                <div className="group card card-hover h-full p-6 sm:p-7">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-line text-amber transition-colors duration-300 group-hover:bg-amber group-hover:text-black">
-                    <Icon size={22} />
+              <Reveal key={detail.title} delay={index * 120}>
+                <article className="group surface flex h-full flex-col overflow-hidden">
+                  <div className="relative overflow-hidden bg-raise">
+                    <img
+                      src={detail.image}
+                      loading="lazy"
+                      alt=""
+                      className="duotone aspect-[16/9] w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-t from-panel to-transparent" />
+                    <span className="absolute bottom-4 left-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber text-black sm:left-8">
+                      <Icon size={22} />
+                    </span>
                   </div>
-                  <h2 className="mt-5 text-lg font-semibold text-white">
-                    {step.title}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-mute">
-                    {step.body}
-                  </p>
-                </div>
+                  <div className="p-6 pt-4 sm:p-8 sm:pt-5">
+                    <h2 className="text-2xl leading-tight font-bold tracking-tight text-white sm:text-3xl">
+                      {detail.title}
+                    </h2>
+                    <p className="mt-4 leading-relaxed text-mute">
+                      {detail.body}
+                    </p>
+                  </div>
+                </article>
               </Reveal>
             );
           })}
         </div>
       </section>
 
-      {/* Detail blocks */}
-      <section className="bg-coal">
-        <div className="container-page space-y-20 py-20 lg:space-y-28 lg:py-28">
-          {details.map((detail, index) => {
-            const Icon = detail.icon;
-            const flip = index % 2 === 1;
-            return (
-              <div
-                key={detail.title}
-                className="grid items-center gap-10 md:grid-cols-2 md:gap-16"
-              >
-                <Reveal className={flip ? "md:order-last" : ""}>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-raise text-amber">
-                    <Icon size={22} />
-                  </div>
-                  <h2 className="mt-6 text-3xl leading-tight font-semibold text-white sm:text-4xl">
-                    {detail.title}
-                  </h2>
-                  <p className="mt-5 leading-relaxed text-mute">
-                    {detail.body}
-                  </p>
-                </Reveal>
-                <Reveal delay={120}>
-                  <div className="overflow-hidden rounded-2xl bg-raise">
-                    <img
-                      src={detail.image}
-                      loading="lazy"
-                      alt=""
-                      className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out hover:scale-105"
-                    />
-                  </div>
-                </Reveal>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
       {/* FAQ */}
-      <section className="container-page grid gap-10 py-20 lg:grid-cols-[1fr_1.8fr] lg:gap-16 lg:py-28">
-        <Reveal>
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Questions we get asked
-          </h2>
-          <p className="mt-4 max-w-xs leading-relaxed text-mute">
-            Anything else on your mind? Your driver details and booking updates
-            are always on WhatsApp.
-          </p>
-        </Reveal>
+      <section className="container-page grid gap-10 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:py-32">
+        <SectionHeading
+          title="Questions we get asked."
+          className="lg:sticky lg:top-32 lg:self-start"
+        >
+          <div className="mt-8 flex items-center gap-4 rounded-3xl border border-white/[0.07] bg-panel p-5">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
+              <MessageCircle size={20} />
+            </span>
+            <p className="text-sm leading-relaxed text-mute">
+              Your driver details and booking updates are always on WhatsApp.
+            </p>
+          </div>
+        </SectionHeading>
         <Reveal delay={100} className="space-y-3">
           {faqData.map((item, index) => (
             <FaqItem
@@ -228,8 +240,8 @@ function SafetyPage() {
       </section>
 
       <ClosingCta
-        title="Book with the details up front"
-        body="Know exactly who is driving you before they arrive."
+        title="Know who's driving before they arrive."
+        body="Book with the details up front and a PIN that only you hold."
       />
     </PageLayout>
   );

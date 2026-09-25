@@ -8,7 +8,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder }) {
     <div className="group relative">
       <Lock
         size={17}
-        className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+        className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dim transition-colors duration-200 group-focus-within:text-amber"
       />
       <input
         id={id}
@@ -23,7 +23,7 @@ function PasswordField({ id, value, onChange, autoComplete, placeholder }) {
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute inset-y-1.5 right-1.5 flex w-10 items-center justify-center rounded-lg text-mute transition-colors duration-200 hover:bg-white/5 hover:text-white"
+        className="absolute inset-y-2 right-2 flex w-10 items-center justify-center rounded-xl text-mute transition-colors duration-200 hover:bg-white/5 hover:text-white"
         aria-label={visible ? "Hide password" : "Show password"}
       >
         {visible ? <EyeOff size={18} /> : <Eye size={18} />}

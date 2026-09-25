@@ -6,19 +6,20 @@ function ClosingCta({ title, body, to = "/", action = "Book a driver" }) {
   return (
     <section className="container-page pb-20 lg:pb-28">
       <Reveal>
-        <div className="rounded-3xl border border-line bg-raise px-7 py-12 text-center sm:px-12 sm:py-16">
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/[0.07] bg-panel px-6 py-14 text-center sm:px-12 sm:py-20">
+          <div className="bg-grid mask-fade absolute inset-0 -z-10" />
+          <div className="absolute bottom-[-10rem] left-1/2 -z-10 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-amber/20 blur-[110px]" />
+          <div className="checker absolute inset-x-0 top-0 h-2 [--sq:4px]" />
+
+          <h2 className="display mx-auto max-w-2xl text-3xl leading-tight sm:text-5xl">
             {title}
           </h2>
           {body && (
-            <p className="mx-auto mt-4 max-w-lg leading-relaxed text-mute">
+            <p className="mx-auto mt-5 max-w-lg leading-relaxed text-mute sm:text-lg">
               {body}
             </p>
           )}
-          <Link
-            to={to}
-            className="btn-primary group mt-8 px-7 py-3.5 text-base"
-          >
+          <Link to={to} className="btn-primary group mt-9 px-8 py-4 text-base">
             {action}
             <ArrowRight
               size={18}

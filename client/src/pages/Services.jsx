@@ -13,6 +13,7 @@ import {
 import PageLayout from "../components/PageLayout";
 import ClosingCta from "../components/ClosingCta";
 import Reveal from "../components/Reveal";
+import { PageHero, SectionHeading } from "../components/Section";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
 import { images } from "../lib/images";
 
@@ -67,100 +68,158 @@ const included = [
   },
 ];
 
+// 24 slots, the booking type's usual range lit up in amber
+function HourBar({ from, to, popular }) {
+  return (
+    <div>
+      <div className="flex gap-[3px]">
+        {Array.from({ length: 24 }, (_, i) => {
+          const on = i + 1 >= from && i + 1 <= to;
+          return (
+            <span
+              key={i}
+              className={`h-7 flex-1 rounded-[3px] transition-colors duration-500 ${
+                on
+                  ? popular
+                    ? "bg-black"
+                    : "bg-amber"
+                  : popular
+                    ? "bg-black/15"
+                    : "bg-white/[0.06]"
+              }`}
+            />
+          );
+        })}
+      </div>
+      <div
+        className={`mt-2 flex justify-between text-[11px] tabular-nums ${popular ? "text-black/60" : "text-dim"}`}
+      >
+        <span>1 hr</span>
+        <span>12 hrs</span>
+        <span>24 hrs</span>
+      </div>
+    </div>
+  );
+}
+
 function Services() {
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="bg-linear-to-b from-raise to-ink">
-        <div className="container-page animate-rise py-20 text-center lg:py-28">
-          <h1 className="mx-auto max-w-3xl text-4xl leading-[1.1] font-bold text-white sm:text-5xl lg:text-6xl">
-            Hire a driver <span className="text-amber">on your terms</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-fog/80">
-            Forget point A to point B rides. Book a verified professional driver
-            for exactly as many hours as you need, and keep them for the whole
-            time.
+      <PageHero
+        title={
+          <>
+            A driver on <span className="text-amber">your terms.</span>
+          </>
+        }
+        body="Forget point A to point B rides. Book a verified professional driver for exactly as many hours as you need, and keep them for the whole time."
+      >
+        <div className="mt-9 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <Link to="/#book" className="btn-primary group px-7 py-4 text-base">
+            Book a driver
+            <ArrowRight
+              size={18}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </Link>
+          <p className="text-sm text-mute">
+            <span className="text-2xl font-bold text-white tabular-nums">
+              {formatINR(HOURLY_RATE)}
+            </span>{" "}
+            per hour, every booking type
           </p>
         </div>
-      </section>
+      </PageHero>
 
       {/* Booking types */}
-      <section className="container-page pb-20 lg:pb-28">
-        <Reveal className="text-center">
-          <h2 className="text-3xl font-semibold text-white sm:text-4xl">
-            Flexible booking options
-          </h2>
-          <p className="mt-4 text-mute">
-            Every option is billed at {formatINR(HOURLY_RATE)} an hour.
-          </p>
-        </Reveal>
+      <section className="container-page pb-20 lg:pb-32">
+        <SectionHeading
+          title="Pick the kind of day you're having."
+          body={`Every option is billed at ${formatINR(HOURLY_RATE)} an hour. The bar shows the usual booking length.`}
+          className="mb-12"
+        />
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3 md:items-stretch lg:gap-6">
+        <div className="grid gap-4 md:grid-cols-3 lg:gap-5">
           {bookingTypes.map((type, index) => {
             const Icon = type.icon;
+            const p = type.popular;
             return (
               <Reveal key={type.name} delay={index * 100}>
                 <article
-                  className={`group card card-hover relative flex h-full flex-col p-7 lg:p-8 ${
-                    type.popular
-                      ? "border-amber/60 md:-translate-y-3 md:hover:-translate-y-5"
-                      : ""
+                  className={`group relative flex h-full flex-col rounded-3xl p-6 transition-transform duration-300 hover:-translate-y-1 sm:p-8 ${
+                    p
+                      ? "bg-amber text-black shadow-[0_30px_80px_-30px_rgb(255_193_7/0.6)]"
+                      : "border border-white/[0.07] bg-panel"
                   }`}
                 >
-                  {type.popular && (
-                    <span className="absolute top-6 right-6 rounded-full bg-amber px-3 py-1 text-xs font-semibold text-black">
-                      Most popular
+                  <div className="flex items-start justify-between">
+                    <span
+                      className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
+                        p ? "bg-black text-amber" : "bg-amber/10 text-amber"
+                      }`}
+                    >
+                      <Icon size={26} />
                     </span>
-                  )}
-                  <div
-                    className={`flex h-16 w-16 items-center justify-center rounded-full transition-colors duration-300 ${
-                      type.popular
-                        ? "bg-amber text-black"
-                        : "bg-line text-amber group-hover:bg-amber group-hover:text-black"
-                    }`}
-                  >
-                    <Icon size={28} />
+                    {p && (
+                      <span className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-amber">
+                        Most popular
+                      </span>
+                    )}
                   </div>
 
-                  <h3 className="mt-6 text-2xl font-semibold text-white">
+                  <h3
+                    className={`mt-8 text-2xl font-bold tracking-tight ${p ? "" : "text-white"}`}
+                  >
                     {type.name}
                   </h3>
-                  <p className="mt-1 text-sm text-mute">
-                    Usually {type.hours[0]} to {type.hours[1]} hours
-                  </p>
-                  <p className="mt-4 leading-relaxed text-fog/80">
+                  <p
+                    className={`mt-3 leading-relaxed ${p ? "text-black/70" : "text-mute"}`}
+                  >
                     {type.description}
                   </p>
 
-                  <ul className="mt-6 space-y-2.5">
+                  <div className="mt-7">
+                    <HourBar from={type.hours[0]} to={type.hours[1]} popular={p} />
+                  </div>
+
+                  <ul className="mt-7 space-y-3">
                     {type.included.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-center gap-3 text-sm text-fog"
-                      >
-                        <Check size={16} className="shrink-0 text-amber" />
-                        {item}
+                      <li key={item} className="flex items-center gap-3 text-sm">
+                        <span
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                            p ? "bg-black text-amber" : "bg-amber/15 text-amber"
+                          }`}
+                        >
+                          <Check size={12} strokeWidth={3} />
+                        </span>
+                        <span className={p ? "" : "text-fog"}>{item}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <div className="mt-auto pt-8">
-                    <div className="border-t border-line pt-5">
-                      <p className="text-xl font-semibold text-white tabular-nums">
+                  <div className="flex-1" />
+                  <div
+                    className={`mt-8 flex items-end justify-between gap-4 border-t pt-6 ${p ? "border-black/15" : "border-white/[0.07]"}`}
+                  >
+                    <div>
+                      <p
+                        className={`text-xl font-bold tabular-nums ${p ? "" : "text-white"}`}
+                      >
                         {formatINR(type.hours[0] * HOURLY_RATE)} to{" "}
                         {formatINR(type.hours[1] * HOURLY_RATE)}
                       </p>
-                      <Link
-                        to={`/?hours=${type.hours[0]}#book`}
-                        className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-amber"
-                      >
-                        Book this
-                        <ArrowRight
-                          size={16}
-                          className="transition-transform duration-300 group-hover:translate-x-1"
-                        />
-                      </Link>
+                      <p className={`mt-1 text-xs ${p ? "text-black/60" : "text-mute"}`}>
+                        For {type.hours[0]} to {type.hours[1]} hours
+                      </p>
                     </div>
+                    <Link
+                      to={`/?hours=${type.hours[0]}#book`}
+                      aria-label={`Book ${type.name}`}
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:-rotate-45 ${
+                        p ? "bg-black text-amber" : "bg-amber text-black"
+                      }`}
+                    >
+                      <ArrowRight size={20} />
+                    </Link>
                   </div>
                 </article>
               </Reveal>
@@ -170,55 +229,64 @@ function Services() {
       </section>
 
       {/* Included */}
-      <section className="bg-coal py-20 lg:py-28">
-        <div className="container-page grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
-          <div>
-            <Reveal>
-              <h2 className="text-3xl leading-tight font-semibold text-white sm:text-4xl">
-                Included in <span className="text-amber">every booking</span>
-              </h2>
+      <section className="border-y border-white/[0.06] bg-coal py-20 lg:py-32">
+        <div className="container-page grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+          <div className="lg:sticky lg:top-32 lg:self-start">
+            <SectionHeading
+              title={
+                <>
+                  Included in <span className="text-amber">every booking.</span>
+                </>
+              }
+              body="No add-ons to choose and nothing extra at the end of the ride."
+            />
+            <Reveal delay={120} className="mt-10">
+              <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-raise">
+                <img
+                  src={images.carInterior}
+                  loading="lazy"
+                  alt="Inside of a car seen from the back seat"
+                  className="duotone aspect-[16/10] w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
+                <p className="absolute bottom-5 left-5 text-lg font-semibold text-white">
+                  You sit back. <span className="text-amber">We drive.</span>
+                </p>
+              </div>
             </Reveal>
-
-            <ul className="mt-10 space-y-3">
-              {included.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <Reveal as="li" key={item.title} delay={index * 80}>
-                    <div className="group flex items-start gap-5 rounded-2xl p-4 transition-colors duration-300 hover:bg-panel sm:-mx-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-raise text-amber transition-colors duration-300 group-hover:bg-amber group-hover:text-black">
-                        <Icon size={22} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 leading-relaxed text-mute">
-                          {item.body}
-                        </p>
-                      </div>
-                    </div>
-                  </Reveal>
-                );
-              })}
-            </ul>
           </div>
 
-          <Reveal delay={120} className="order-first lg:order-last">
-            <div className="overflow-hidden rounded-2xl bg-raise">
-              <img
-                src={images.carInterior}
-                loading="lazy"
-                alt="Inside of a car seen from the back seat"
-                className="aspect-[4/3] w-full object-cover transition-transform duration-700 ease-out hover:scale-105 lg:aspect-[4/5]"
-              />
-            </div>
-          </Reveal>
+          <ol className="space-y-4">
+            {included.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <Reveal as="li" key={item.title} delay={index * 80}>
+                  <div className="group card card-hover flex gap-5 p-6 sm:gap-7 sm:p-8">
+                    <span className="text-4xl font-extrabold tracking-tighter text-white/10 tabular-nums transition-colors duration-300 group-hover:text-amber sm:text-5xl">
+                      0{index + 1}
+                    </span>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <Icon size={20} className="text-amber" />
+                        <h3 className="text-lg font-semibold text-white sm:text-xl">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <p className="mt-2 leading-relaxed text-mute">
+                        {item.body}
+                      </p>
+                    </div>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </ol>
         </div>
       </section>
 
       <div className="pt-20 lg:pt-28">
         <ClosingCta
-          title="Ready when you are"
+          title="Ready when you are."
           body="Choose your pickup point and hours. You will see the exact fare before you confirm."
         />
       </div>

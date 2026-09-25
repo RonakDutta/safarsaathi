@@ -53,7 +53,7 @@ const Signup = () => {
           <div className="group relative">
             <User
               size={17}
-              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dim transition-colors duration-200 group-focus-within:text-amber"
             />
             <input
               id="signup-name"
@@ -75,7 +75,7 @@ const Signup = () => {
           <div className="group relative">
             <Mail
               size={17}
-              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber"
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dim transition-colors duration-200 group-focus-within:text-amber"
             />
             <input
               id="signup-email"
@@ -105,7 +105,7 @@ const Signup = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="btn-primary mt-3 w-full py-3.5 text-base"
+          className="btn-primary mt-4 w-full py-4 text-base"
         >
           {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
           Create account

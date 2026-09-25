@@ -7,6 +7,14 @@ import {
   Users,
   Trash2,
   ArrowRight,
+  IndianRupee,
+  MapPin,
+  Clock,
+  Phone,
+  CarFront,
+  IdCard,
+  Check,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "../api/axios";
@@ -27,7 +35,7 @@ import {
 
 function SectionTitle({ title, action }) {
   return (
-    <div className="mb-4 flex items-baseline justify-between gap-4">
+    <div className="mb-4 flex items-center justify-between gap-4">
       <h2 className="text-lg font-semibold text-white">{title}</h2>
       {action}
     </div>
@@ -38,7 +46,7 @@ function TextButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="group inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:text-amber-soft"
+      className="group inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3.5 py-1.5 text-sm font-medium text-amber transition-colors hover:bg-amber hover:text-black"
     >
       {children}
       <ArrowRight
@@ -51,24 +59,43 @@ function TextButton({ onClick, children }) {
 
 function Tabs({ tabs, value, onChange }) {
   return (
-    <div className="mb-6 flex gap-6 border-b border-line" role="tablist">
+    <div
+      className="no-scrollbar mb-6 flex w-full gap-1 overflow-x-auto rounded-full border border-white/[0.07] bg-coal p-1 sm:w-fit"
+      role="tablist"
+    >
       {tabs.map((tab) => (
         <button
           key={tab.value}
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`-mb-px border-b-2 pb-3 text-sm font-medium transition-colors duration-200 ${
+          className={`flex flex-1 shrink-0 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 sm:flex-none ${
             value === tab.value
-              ? "border-amber text-white"
-              : "border-transparent text-mute hover:text-white"
+              ? "bg-amber text-black"
+              : "text-mute hover:text-white"
           }`}
         >
           {tab.label}
-          <span className="ml-2 text-mute tabular-nums">{tab.count}</span>
+          <span
+            className={`rounded-full px-1.5 text-xs tabular-nums ${
+              value === tab.value ? "bg-black/15" : "bg-white/[0.06]"
+            }`}
+          >
+            {tab.count}
+          </span>
         </button>
       ))}
     </div>
+  );
+}
+
+function Meta({ icon, children }) {
+  const Icon = icon;
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 text-xs text-fog">
+      <Icon size={13} className="text-mute" />
+      {children}
+    </span>
   );
 }
 
@@ -250,39 +277,49 @@ const AdminDashboard = () => {
                 label: "Revenue",
                 value: formatINR(stats.revenue),
                 accent: true,
+                icon: IndianRupee,
               },
               {
                 label: "Total bookings",
                 value: Number(stats.totalBookings) || 0,
+                icon: Ticket,
               },
-              { label: "Drivers", value: Number(stats.activeDrivers) || 0 },
               {
-                label: "Applications to review",
+                label: "Drivers",
+                value: Number(stats.activeDrivers) || 0,
+                icon: Users,
+              },
+              {
+                label: "To review",
                 value: Number(stats.pendingApps) || 0,
+                icon: UserCheck,
               },
             ]}
           />
 
-          <div className="mt-12 grid gap-12 xl:grid-cols-[1.4fr_1fr]">
-            <section>
+          <div className="mt-10 grid gap-10 xl:grid-cols-[1.4fr_1fr]">
+            <section className="min-w-0">
               <SectionTitle
                 title="Waiting for a driver"
                 action={
                   pendingBookings.length > 0 && (
                     <TextButton onClick={() => showBookings("pending")}>
-                      Assign drivers
+                      Assign
                     </TextButton>
                   )
                 }
               />
               {pendingBookings.length > 0 ? (
-                <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
+                <ul className="surface divide-y divide-white/[0.06] overflow-hidden">
                   {pendingBookings.slice(0, 5).map((b) => (
                     <li
                       key={b.booking_id}
-                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors duration-200 hover:bg-white/[0.02]"
+                      className="flex items-center gap-4 px-4 py-4 transition-colors duration-200 hover:bg-white/[0.02] sm:px-5"
                     >
-                      <div className="min-w-0">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
+                        <MapPin size={18} />
+                      </span>
+                      <div className="min-w-0 flex-1">
                         <p className="truncate font-medium text-white">
                           {b.user_name}
                         </p>
@@ -291,21 +328,26 @@ const AdminDashboard = () => {
                         </p>
                       </div>
                       <div className="shrink-0 text-right text-sm">
-                        <p className="text-fog">{hoursLabel(b.duration)}</p>
-                        <p className="text-mute">{formatDate(b.created_at)}</p>
+                        <p className="font-semibold text-white tabular-nums">
+                          {hoursLabel(b.duration)}
+                        </p>
+                        <p className="text-xs text-mute">
+                          {formatDate(b.created_at)}
+                        </p>
                       </div>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <EmptyState
+                  icon={Check}
                   title="Every booking has a driver"
                   body="New requests will appear here."
                 />
               )}
             </section>
 
-            <section>
+            <section className="min-w-0">
               <SectionTitle
                 title="Applications to review"
                 action={
@@ -317,21 +359,33 @@ const AdminDashboard = () => {
                 }
               />
               {pendingApps.length > 0 ? (
-                <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
+                <ul className="surface divide-y divide-white/[0.06] overflow-hidden">
                   {pendingApps.slice(0, 5).map((app) => (
-                    <li key={app.application_id} className="px-5 py-4">
-                      <p className="font-medium text-white">{app.full_name}</p>
-                      <p className="text-sm text-mute">{app.car_model}</p>
+                    <li
+                      key={app.application_id}
+                      className="flex items-center gap-4 px-4 py-4 sm:px-5"
+                    >
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.05] text-sm font-bold text-white">
+                        {(app.full_name || "?").charAt(0).toUpperCase()}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-white">
+                          {app.full_name}
+                        </p>
+                        <p className="truncate text-sm text-mute">
+                          {app.car_model}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <EmptyState title="Nothing to review" />
+                <EmptyState icon={UserCheck} title="Nothing to review" />
               )}
             </section>
           </div>
 
-          <section className="mt-12">
+          <section className="mt-10">
             <SectionTitle
               title="Recent bookings"
               action={
@@ -341,15 +395,17 @@ const AdminDashboard = () => {
               }
             />
             {bookings.length > 0 ? (
-              <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
+              <ul className="surface divide-y divide-white/[0.06] overflow-hidden">
                 {bookings.slice(0, 6).map((b) => {
                   const status = getStatus(b.status);
                   return (
                     <li
                       key={b.booking_id}
-                      className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 px-5 py-4 md:grid-cols-[10rem_1fr_8rem_8rem] md:items-center"
+                      className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 px-4 py-4 sm:px-5 md:grid-cols-[10rem_1fr_9rem_9rem] md:items-center"
                     >
-                      <p className="font-medium text-white">{b.user_name}</p>
+                      <p className="truncate font-medium text-white">
+                        {b.user_name}
+                      </p>
                       <p className="col-span-2 row-start-2 truncate text-sm text-mute md:col-span-1 md:row-start-auto">
                         {b.pickup_location}
                       </p>
@@ -364,7 +420,7 @@ const AdminDashboard = () => {
                 })}
               </ul>
             ) : (
-              <EmptyState title="No bookings yet" />
+              <EmptyState icon={Ticket} title="No bookings yet" />
             )}
           </section>
         </div>
@@ -373,7 +429,10 @@ const AdminDashboard = () => {
       {/* BOOKINGS */}
       {activeTab === "bookings" && (
         <div className="animate-rise">
-          <PageHeader title="Bookings" />
+          <PageHeader
+            title="Bookings"
+            description="Pick a driver for each new request."
+          />
           <Tabs
             value={bookingView}
             onChange={setBookingView}
@@ -392,97 +451,95 @@ const AdminDashboard = () => {
           />
 
           {visibleBookings.length > 0 ? (
-            <div className="overflow-hidden rounded-2xl border border-line bg-panel">
-              <div className="hidden grid-cols-[1.1fr_1.6fr_1fr_1.5fr] gap-6 border-b border-line px-6 py-3 text-xs text-mute lg:grid">
-                <span>Customer</span>
-                <span>Pickup</span>
-                <span>Trip</span>
-                <span className="text-right">
-                  {bookingView === "pending" ? "Assign" : "Status"}
-                </span>
-              </div>
-              <ul className="divide-y divide-line">
-                {visibleBookings.map((b) => {
-                  const status = getStatus(b.status);
-                  return (
-                    <li
-                      key={b.booking_id}
-                      className="grid gap-4 px-5 py-5 lg:grid-cols-[1.1fr_1.6fr_1fr_1.5fr] lg:items-center lg:gap-6 lg:px-6"
-                    >
+            <ul className="space-y-3">
+              {visibleBookings.map((b) => {
+                const status = getStatus(b.status);
+                return (
+                  <li
+                    key={b.booking_id}
+                    className="surface grid gap-4 p-4 transition-colors duration-200 hover:border-white/15 sm:p-5 lg:grid-cols-[1.1fr_1.6fr_auto] lg:items-center lg:gap-8 lg:px-6"
+                  >
+                    <div className="flex items-start justify-between gap-3 lg:block">
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-white">
+                        <p className="truncate font-semibold text-white">
                           {b.user_name}
                         </p>
-                        <p className="text-sm text-mute tabular-nums">
-                          <a
-                            href={`tel:+${b.phone}`}
-                            className="hover:text-white"
-                          >
-                            +{b.phone}
-                          </a>
-                        </p>
+                        <a
+                          href={`tel:+${b.phone}`}
+                          className="text-sm text-mute tabular-nums hover:text-amber"
+                        >
+                          +{b.phone}
+                        </a>
                       </div>
-                      <p className="text-sm leading-relaxed text-fog lg:line-clamp-2">
+                      <span className="shrink-0 text-xs text-dim tabular-nums lg:mt-1 lg:block">
+                        #{b.booking_id}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="flex gap-2 text-sm leading-relaxed text-fog lg:line-clamp-2">
+                        <MapPin
+                          size={15}
+                          className="mt-0.5 shrink-0 text-amber"
+                        />
                         {b.pickup_location}
                       </p>
-                      <div className="text-sm">
-                        <p className="text-fog">
-                          {hoursLabel(b.duration)}, {b.payment_method}
-                        </p>
-                        <p className="text-mute">
-                          #{b.booking_id}, {formatDate(b.created_at)}
-                        </p>
+                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                        <Meta icon={Clock}>{hoursLabel(b.duration)}</Meta>
+                        <Meta icon={IndianRupee}>{b.payment_method}</Meta>
+                        {b.created_at && (
+                          <Meta icon={Ticket}>{formatDate(b.created_at)}</Meta>
+                        )}
                       </div>
+                    </div>
 
-                      {b.status === "pending" ? (
-                        <div className="flex gap-2 lg:justify-end">
-                          <select
-                            aria-label={`Driver for booking ${b.booking_id}`}
-                            className="field min-w-0 flex-1 py-2.5 text-sm lg:max-w-44"
-                            value={selectedDriver[b.booking_id] || ""}
-                            onChange={(e) =>
-                              setSelectedDriver({
-                                ...selectedDriver,
-                                [b.booking_id]: e.target.value,
-                              })
-                            }
-                          >
-                            <option value="">Choose driver</option>
-                            {drivers.map((d) => (
-                              <option key={d.user_id} value={d.user_id}>
-                                {d.full_name}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => handleAssign(b.booking_id)}
-                            className="btn-primary py-2.5"
-                          >
-                            Assign
-                          </button>
-                          <button
-                            onClick={() => setDeleteBookingId(b.booking_id)}
-                            className="btn-danger px-3 py-2.5"
-                            aria-label={`Delete booking ${b.booking_id}`}
-                            title="Delete booking"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="lg:text-right">
-                          <span className={status.className}>
-                            {status.label}
-                          </span>
-                        </p>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+                    {b.status === "pending" ? (
+                      <div className="flex gap-2 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
+                        <select
+                          aria-label={`Driver for booking ${b.booking_id}`}
+                          className="field min-w-0 flex-1 rounded-full py-2.5 text-sm lg:w-44 lg:flex-none"
+                          value={selectedDriver[b.booking_id] || ""}
+                          onChange={(e) =>
+                            setSelectedDriver({
+                              ...selectedDriver,
+                              [b.booking_id]: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="">Choose driver</option>
+                          {drivers.map((d) => (
+                            <option key={d.user_id} value={d.user_id}>
+                              {d.full_name}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => handleAssign(b.booking_id)}
+                          className="btn-primary px-5 py-2.5"
+                        >
+                          Assign
+                        </button>
+                        <button
+                          onClick={() => setDeleteBookingId(b.booking_id)}
+                          className="btn-danger px-3 py-2.5"
+                          aria-label={`Delete booking ${b.booking_id}`}
+                          title="Delete booking"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="lg:text-right">
+                        <span className={status.className}>{status.label}</span>
+                      </p>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           ) : (
             <EmptyState
+              icon={Ticket}
               title={
                 bookingView === "pending"
                   ? "No bookings are waiting for a driver"
@@ -501,52 +558,70 @@ const AdminDashboard = () => {
             description="Approving an application upgrades that person's account to a driver account."
           />
           {pendingApps.length > 0 ? (
-            <ul className="divide-y divide-line rounded-2xl border border-line bg-panel">
+            <ul className="grid gap-4 md:grid-cols-2">
               {pendingApps.map((app) => (
                 <li
                   key={app.application_id}
-                  className="grid gap-4 px-5 py-5 md:grid-cols-[1.2fr_1.5fr_auto] md:items-center md:gap-8 md:px-6"
+                  className="surface flex flex-col p-5 sm:p-6"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-white">
-                      {app.full_name}
-                    </p>
-                    <p className="truncate text-sm text-mute">
-                      {app.email}
-                      {app.applied_at && (
-                        <>, applied {formatDay(app.applied_at)}</>
-                      )}
-                    </p>
+                  <div className="flex items-center gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber text-lg font-bold text-black">
+                      {(app.full_name || "?").charAt(0).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-white">
+                        {app.full_name}
+                      </p>
+                      <p className="truncate text-sm text-mute">
+                        {app.email}
+                      </p>
+                    </div>
                   </div>
-                  <dl className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <dt className="text-mute">Phone</dt>
-                      <dd className="mt-0.5 text-fog tabular-nums">
-                        {app.phone}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-mute">Car</dt>
-                      <dd className="mt-0.5 text-fog">{app.car_model}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-mute">Licence</dt>
-                      <dd className="mt-0.5 break-all text-fog">
-                        {app.license_number || "Not given"}
-                      </dd>
-                    </div>
+                  <dl className="mt-5 grid gap-2 text-sm">
+                    {[
+                      { icon: Phone, label: "Phone", value: app.phone },
+                      { icon: CarFront, label: "Car", value: app.car_model },
+                      {
+                        icon: IdCard,
+                        label: "Licence",
+                        value: app.license_number || "Not given",
+                      },
+                    ].map((row) => {
+                      const Icon = row.icon;
+                      return (
+                        <div
+                          key={row.label}
+                          className="flex items-center gap-3 rounded-2xl bg-black/40 px-3.5 py-2.5"
+                        >
+                          <Icon size={15} className="shrink-0 text-amber" />
+                          <dt className="w-16 shrink-0 text-mute">
+                            {row.label}
+                          </dt>
+                          <dd className="min-w-0 break-all text-fog tabular-nums">
+                            {row.value}
+                          </dd>
+                        </div>
+                      );
+                    })}
                   </dl>
-                  <div className="flex gap-2 md:justify-end">
+                  {app.applied_at && (
+                    <p className="mt-3 text-xs text-dim">
+                      Applied {formatDay(app.applied_at)}
+                    </p>
+                  )}
+                  <div className="mt-5 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => handleReject(app.application_id)}
-                      className="btn-danger flex-1 py-2.5 md:flex-none"
+                      className="btn-danger py-3"
                     >
+                      <X size={16} />
                       Reject
                     </button>
                     <button
                       onClick={() => handleApprove(app.application_id)}
-                      className="btn-primary flex-1 py-2.5 md:flex-none"
+                      className="btn-primary py-3"
                     >
+                      <Check size={16} />
                       Approve
                     </button>
                   </div>
@@ -555,6 +630,7 @@ const AdminDashboard = () => {
             </ul>
           ) : (
             <EmptyState
+              icon={UserCheck}
               title="No applications waiting"
               body="New driver applications will appear here for review."
             />
@@ -570,50 +646,59 @@ const AdminDashboard = () => {
             description="Everyone approved to take rides, sorted by completed trips."
           />
           {driverList.length > 0 ? (
-            <div className="overflow-hidden rounded-2xl border border-line bg-panel">
-              <div className="hidden grid-cols-[1.2fr_1.5fr_1.3fr_5rem] gap-6 border-b border-line px-6 py-3 text-xs text-mute md:grid">
-                <span>Driver</span>
-                <span>Contact</span>
-                <span>Vehicle</span>
-                <span className="text-right">Trips</span>
-              </div>
-              <ul className="divide-y divide-line">
-                {driverList.map((driver) => (
-                  <li
-                    key={driver.user_id}
-                    className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-2 px-5 py-5 md:grid-cols-[1.2fr_1.5fr_1.3fr_5rem] md:items-center md:px-6"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-white">
-                        {driver.full_name}
-                      </p>
-                      <p className="text-sm text-mute">
-                        Joined {formatDay(driver.created_at)}
-                      </p>
+            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {driverList.map((driver, index) => (
+                <li
+                  key={driver.user_id}
+                  className="surface relative flex flex-col overflow-hidden p-5 sm:p-6"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base font-bold ${
+                          index === 0 && Number(driver.total_trips) > 0
+                            ? "bg-amber text-black"
+                            : "bg-white/[0.06] text-white"
+                        }`}
+                      >
+                        {(driver.full_name || "?").charAt(0).toUpperCase()}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-white">
+                          {driver.full_name}
+                        </p>
+                        <p className="text-xs text-mute">
+                          Joined {formatDay(driver.created_at)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="col-span-2 min-w-0 text-sm md:col-span-1">
-                      <p className="truncate text-fog tabular-nums">
-                        {driver.phone_number || "No phone on file"}
+                    <div className="shrink-0 text-right">
+                      <p className="text-2xl font-bold text-white tabular-nums">
+                        {driver.total_trips || 0}
                       </p>
-                      <p className="truncate text-mute">{driver.email}</p>
+                      <p className="text-[11px] text-mute">trips</p>
                     </div>
-                    <div className="col-span-2 min-w-0 text-sm md:col-span-1">
-                      <p className="truncate text-fog">
-                        {driver.car_model || "No car on file"}
-                      </p>
-                      <p className="truncate text-mute">
-                        {driver.license_number || "No licence on file"}
-                      </p>
-                    </div>
-                    <p className="col-start-2 row-start-1 text-right text-lg font-semibold text-white tabular-nums md:col-start-auto md:row-start-auto">
-                      {driver.total_trips || 0}
+                  </div>
+                  <div className="mt-5 space-y-1.5 border-t border-white/[0.06] pt-4 text-sm">
+                    <p className="flex items-center gap-2.5 truncate text-fog tabular-nums">
+                      <Phone size={14} className="shrink-0 text-dim" />
+                      {driver.phone_number || "No phone on file"}
                     </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    <p className="flex items-center gap-2.5 truncate text-fog">
+                      <CarFront size={14} className="shrink-0 text-dim" />
+                      {driver.car_model || "No car on file"}
+                    </p>
+                    <p className="flex items-center gap-2.5 truncate text-mute">
+                      <IdCard size={14} className="shrink-0 text-dim" />
+                      {driver.license_number || "No licence on file"}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           ) : (
             <EmptyState
+              icon={Users}
               title="No drivers yet"
               body="Approve an application to add your first driver."
             />
