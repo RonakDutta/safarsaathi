@@ -61,8 +61,8 @@ function Navbar() {
         <nav
           className={`mx-auto flex h-16 max-w-7xl items-center justify-between rounded-full border pr-2 pl-4 transition-[background-color,border-color,box-shadow] duration-300 sm:pl-5 ${
             scrolled
-              ? "border-white/10 bg-black/70 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl"
-              : "border-white/[0.06] bg-black/30 backdrop-blur-md"
+              ? "border-white/10 bg-black/90 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.9)] lg:bg-black/70 lg:backdrop-blur-xl"
+              : "border-white/[0.06] bg-black/60 lg:bg-black/30 lg:backdrop-blur-md"
           }`}
         >
           <Logo className="text-lg sm:text-xl" />
@@ -153,12 +153,12 @@ function Navbar() {
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
-        className={`fixed inset-0 z-[70] flex flex-col bg-ink transition-[opacity,visibility] duration-300 lg:hidden ${
+        className={`fixed inset-0 z-[70] flex flex-col overflow-hidden bg-ink transition-[opacity,visibility] duration-300 lg:hidden ${
           isMenuOpen ? "visible opacity-100" : "invisible opacity-0"
         }`}
       >
         <div className="bg-grid mask-fade pointer-events-none absolute inset-0" />
-        <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-amber/20 blur-[120px]" />
+        <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 glow [--glow:0.28]" />
 
         <div className="relative flex items-center justify-between px-5 pt-5">
           <Logo className="text-lg" onClick={closeMenu} />

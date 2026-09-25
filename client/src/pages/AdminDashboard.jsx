@@ -36,7 +36,9 @@ import {
 function SectionTitle({ title, action }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-4">
-      <h2 className="text-lg font-semibold text-white">{title}</h2>
+      <h2 className="text-base font-semibold text-white sm:text-lg">
+        {title}
+      </h2>
       {action}
     </div>
   );
@@ -331,7 +333,7 @@ const AdminDashboard = () => {
                         <p className="font-semibold text-white tabular-nums">
                           {hoursLabel(b.duration)}
                         </p>
-                        <p className="text-xs text-mute">
+                        <p className="hidden text-xs text-mute sm:block">
                           {formatDate(b.created_at)}
                         </p>
                       </div>

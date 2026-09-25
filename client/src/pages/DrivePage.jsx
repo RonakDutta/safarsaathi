@@ -90,7 +90,7 @@ function StatusPanel({ icon, title, body, children }) {
     <PageLayout>
       <section className="relative isolate overflow-hidden">
         <div className="bg-grid mask-fade absolute inset-0 -z-10" />
-        <div className="absolute top-1/3 left-1/2 -z-10 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-amber/15 blur-[120px]" />
+        <div className="absolute top-1/3 left-1/2 -z-10 h-80 w-[36rem] -translate-x-1/2 glow [--glow:0.21]" />
         <div className="container-page flex justify-center pt-36 pb-24 lg:pt-44 lg:pb-32">
           <div className="animate-pop relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/[0.08] bg-panel p-8 text-center sm:p-12">
             <div className="checker absolute inset-x-0 top-0 h-2 [--sq:4px]" />
@@ -209,7 +209,7 @@ function DrivePage() {
     <form
       id="apply"
       onSubmit={handleSubmit}
-      className="relative scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-panel/90 shadow-[0_40px_120px_-30px_rgb(0_0_0/1)] backdrop-blur-xl"
+      className="relative scroll-mt-28 overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-panel shadow-[0_40px_120px_-30px_rgb(0_0_0/1)]"
     >
       <div className="checker absolute inset-x-6 top-0 h-1.5 rounded-b-md [--sq:3px]" />
       <div className="px-5 pt-8 sm:px-7">

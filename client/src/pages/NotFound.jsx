@@ -7,7 +7,7 @@ function NotFound() {
     <PageLayout>
       <section className="relative isolate overflow-hidden">
         <div className="bg-grid mask-fade absolute inset-0 -z-10" />
-        <div className="absolute top-1/3 left-1/2 -z-10 h-80 w-[40rem] -translate-x-1/2 rounded-full bg-amber/15 blur-[120px]" />
+        <div className="absolute top-1/3 left-1/2 -z-10 h-80 w-[40rem] -translate-x-1/2 glow [--glow:0.21]" />
 
         <div className="container-page flex flex-col items-center pt-36 pb-24 text-center lg:pt-44 lg:pb-36">
           <p className="animate-rise text-[8rem] leading-none font-extrabold tracking-tighter text-amber sm:text-[12rem]">

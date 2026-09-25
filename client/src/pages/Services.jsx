@@ -178,12 +178,19 @@ function Services() {
                   </p>
 
                   <div className="mt-7">
-                    <HourBar from={type.hours[0]} to={type.hours[1]} popular={p} />
+                    <HourBar
+                      from={type.hours[0]}
+                      to={type.hours[1]}
+                      popular={p}
+                    />
                   </div>
 
                   <ul className="mt-7 space-y-3">
                     {type.included.map((item) => (
-                      <li key={item} className="flex items-center gap-3 text-sm">
+                      <li
+                        key={item}
+                        className="flex items-center gap-3 text-sm"
+                      >
                         <span
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                             p ? "bg-black text-amber" : "bg-amber/15 text-amber"
@@ -207,7 +214,9 @@ function Services() {
                         {formatINR(type.hours[0] * HOURLY_RATE)} to{" "}
                         {formatINR(type.hours[1] * HOURLY_RATE)}
                       </p>
-                      <p className={`mt-1 text-xs ${p ? "text-black/60" : "text-mute"}`}>
+                      <p
+                        className={`mt-1 text-xs ${p ? "text-black/60" : "text-mute"}`}
+                      >
                         For {type.hours[0]} to {type.hours[1]} hours
                       </p>
                     </div>
@@ -245,6 +254,8 @@ function Services() {
                 <img
                   src={images.carInterior}
                   loading="lazy"
+                  decoding="async"
+                  onError={(e) => (e.currentTarget.style.visibility = "hidden")}
                   alt="Inside of a car seen from the back seat"
                   className="duotone aspect-[16/10] w-full object-cover"
                 />

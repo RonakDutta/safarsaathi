@@ -13,6 +13,7 @@ import {
   Check,
   CheckCheck,
   TrendingUp,
+  Ticket,
 } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import BookingForm from "../components/BookingForm";
@@ -104,11 +105,11 @@ function HeroRoute() {
 
 function PinDemo() {
   return (
-    <div className="flex gap-2">
+    <div className="grid grid-cols-4 gap-2">
       {["4", "8", "2", "9"].map((d, i) => (
         <span
           key={i}
-          className="flex h-12 w-10 items-center justify-center rounded-xl border border-amber/30 bg-black text-xl font-bold text-amber tabular-nums sm:h-14 sm:w-12"
+          className="flex h-14 items-center justify-center rounded-xl border border-amber/30 bg-black text-2xl font-bold text-amber tabular-nums"
         >
           {d}
         </span>
@@ -117,49 +118,72 @@ function PinDemo() {
   );
 }
 
-function ChatDemo() {
+const whatsappSteps = [
+  { icon: Ticket, label: "Booking" },
+  { icon: UserCheck, label: "Driver" },
+  { icon: KeyRound, label: "PIN" },
+];
+
+// Three updates, joined by a dashed line, that land in one chat.
+function WhatsappFlow() {
   return (
-    <div className="space-y-2.5">
-      <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-white/[0.06] px-4 py-3 text-sm text-fog">
-        <p className="font-semibold text-white">Booking confirmed</p>
-        <p className="mt-0.5 text-mute">4 hours, pickup at your address</p>
-      </div>
-      <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-white/[0.06] px-4 py-3 text-sm text-fog">
-        <p className="font-semibold text-white">Your driver is assigned</p>
-        <p className="mt-0.5 text-mute">Name, car, number plate and phone</p>
-      </div>
-      <div className="ml-auto flex max-w-[70%] items-end justify-end gap-1.5 rounded-2xl rounded-tr-md bg-amber px-4 py-3 text-sm font-medium text-black">
-        Ride PIN received
-        <CheckCheck size={16} />
-      </div>
+    <div className="relative grid grid-cols-3">
+      <span className="absolute top-6 right-[16.66%] left-[16.66%] border-t-2 border-dashed border-amber/30" />
+      {whatsappSteps.map((step, i) => {
+        const Icon = step.icon;
+        const last = i === whatsappSteps.length - 1;
+        return (
+          <div key={step.label} className="relative flex flex-col items-center">
+            <span
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
+                last
+                  ? "border-amber bg-amber text-black"
+                  : "border-amber/25 bg-black text-amber"
+              }`}
+            >
+              <Icon size={20} />
+            </span>
+            <span className="mt-2.5 flex items-center gap-1 text-xs font-medium text-fog">
+              {step.label}
+              <CheckCheck size={14} className="text-ok" />
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 function SurgeDemo() {
   return (
-    <svg viewBox="0 0 300 110" className="h-auto w-full" aria-hidden="true">
-      <path
-        d="M0 80 L30 70 L55 88 L80 40 L105 64 L130 22 L160 70 L185 34 L210 76 L240 18 L270 60 L300 44"
-        fill="none"
-        stroke="#3a3a3a"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M0 62 L300 62"
-        fill="none"
-        stroke="#ffc107"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <text x="0" y="106" fill="#5c5c5c" fontSize="10">
-        Surge fares
-      </text>
-      <text x="300" y="54" fill="#ffc107" fontSize="10" textAnchor="end">
-        SafarSaathi
-      </text>
-    </svg>
+    <div>
+      <svg viewBox="0 0 300 100" className="h-auto w-full" aria-hidden="true">
+        <path
+          d="M0 80 L30 70 L55 88 L80 40 L105 64 L130 22 L160 70 L185 34 L210 76 L240 18 L270 60 L300 44"
+          fill="none"
+          stroke="#3a3a3a"
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M0 58 L300 58"
+          fill="none"
+          stroke="#ffc107"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="mt-3 flex gap-5 text-xs">
+        <span className="flex items-center gap-2 text-fog">
+          <span className="h-[3px] w-4 rounded-full bg-amber" />
+          SafarSaathi
+        </span>
+        <span className="flex items-center gap-2 text-mute">
+          <span className="h-0.5 w-4 rounded-full bg-edge" />
+          Surge fares
+        </span>
+      </div>
+    </div>
   );
 }
 
@@ -170,8 +194,8 @@ function Home() {
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 -z-10">
           <div className="bg-grid mask-fade-b absolute inset-0" />
-          <div className="absolute top-[-10rem] left-[-10rem] h-[34rem] w-[34rem] rounded-full bg-amber/[0.12] blur-[140px]" />
-          <div className="absolute right-[-8rem] bottom-0 h-[26rem] w-[26rem] rounded-full bg-amber/[0.07] blur-[140px]" />
+          <div className="absolute top-[-10rem] left-[-10rem] h-[34rem] w-[34rem] glow [--glow:0.168]" />
+          <div className="absolute right-[-8rem] bottom-0 h-[26rem] w-[26rem] glow [--glow:0.098]" />
           <HeroRoute />
           <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-b from-transparent to-ink" />
         </div>
@@ -203,7 +227,7 @@ function Home() {
               </a>
             </div>
 
-            <dl className="mt-12 grid max-w-lg grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/[0.08] bg-white/[0.02] backdrop-blur-sm">
+            <dl className="mt-12 grid max-w-lg grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
               {heroStats.map((stat) => (
                 <div key={stat.label} className="px-3 py-4 sm:px-5">
                   <dt className="sr-only">{stat.label}</dt>
@@ -242,7 +266,9 @@ function Home() {
           title={
             <>
               From pickup to drop off,{" "}
-              <span className="text-mute">you always know what&apos;s next.</span>
+              <span className="text-mute">
+                you always know what&apos;s next.
+              </span>
             </>
           }
           className="mb-12 lg:mb-16"
@@ -264,10 +290,12 @@ function Home() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:gap-5">
           {/* Price tile */}
           <Reveal className="sm:col-span-2 lg:col-span-4">
-            <div className="group relative isolate flex h-full min-h-[22rem] flex-col justify-end overflow-hidden rounded-3xl border border-white/[0.07] p-6 sm:p-9">
+            <div className="group relative isolate flex h-full min-h-[17rem] flex-col justify-end sm:min-h-[22rem] overflow-hidden rounded-3xl border border-white/[0.07] p-6 sm:p-9">
               <img
                 src={images.whyUs}
                 loading="lazy"
+                decoding="async"
+                onError={(e) => (e.currentTarget.style.visibility = "hidden")}
                 alt=""
                 className="duotone absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
               />
@@ -284,8 +312,8 @@ function Home() {
                 </span>
               </p>
               <p className="mt-3 max-w-md text-fog/80 sm:text-lg">
-                That is the whole price list. No per kilometre charges, no
-                night rates, no surprises.
+                That is the whole price list. No per kilometre charges, no night
+                rates, no surprises.
               </p>
             </div>
           </Reveal>
@@ -351,7 +379,7 @@ function Home() {
                 Confirmation, driver details and your PIN in one chat.
               </p>
               <div className="mt-auto pt-6">
-                <ChatDemo />
+                <WhatsappFlow />
               </div>
             </div>
           </Reveal>
@@ -399,7 +427,7 @@ function Home() {
           </SectionHeading>
 
           <Reveal delay={120}>
-            <div className="relative mx-auto max-w-lg -rotate-1 transition-transform duration-500 hover:rotate-0">
+            <div className="relative mx-auto max-w-lg transition-transform duration-500 sm:-rotate-1 sm:hover:rotate-0">
               <div className="rounded-t-3xl border border-b-0 border-white/[0.08] bg-panel px-6 pt-7 pb-4 sm:px-8">
                 <div className="flex items-center justify-between border-b border-dashed border-edge pb-5">
                   <p className="font-semibold text-white">Fare card</p>
@@ -411,15 +439,15 @@ function Home() {
                   {examples.map((row) => (
                     <li
                       key={row.use}
-                      className="flex items-baseline gap-3 py-4 text-sm sm:text-base"
+                      className="flex items-end gap-3 py-3.5 text-sm sm:text-base"
                     >
                       <span className="min-w-0 text-fog">
                         {row.use}
-                        <span className="ml-2 text-xs text-dim tabular-nums">
-                          {row.hours} hrs
+                        <span className="block text-xs text-dim tabular-nums">
+                          {row.hours} hours
                         </span>
                       </span>
-                      <span className="mb-1 flex-1 border-b border-dotted border-edge" />
+                      <span className="mb-1.5 min-w-4 flex-1 border-b border-dotted border-edge" />
                       <span className="font-semibold text-white tabular-nums">
                         {formatINR(row.hours * HOURLY_RATE)}
                       </span>
