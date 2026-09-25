@@ -4,33 +4,39 @@ import {
   LocateFixed,
   LoaderCircle,
   User,
-  Phone,
   Mail,
   MapPin,
   CreditCard,
   Banknote,
+  Minus,
+  Plus,
+  ArrowRight,
+  Check,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/authContext";
 import axios from "../api/axios";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
+import FareMeter from "./FareMeter";
 
 const DEFAULT_HOURS = 2;
 const quickHours = [2, 4, 8, 12];
 
 const iconClass =
-  "pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-mute transition-colors duration-200 group-focus-within:text-amber";
+  "pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dim transition-colors duration-200 group-focus-within:text-amber";
 
 const paymentOptions = [
   {
     value: "Online",
     label: "Pay online",
+    sub: "UPI, card, netbanking",
     icon: CreditCard,
-    hint: "UPI, card or netbanking through Razorpay, before the ride.",
+    hint: "Paid securely through Razorpay before the ride.",
   },
   {
     value: "Cash",
     label: "Pay in cash",
+    sub: "After the ride",
     icon: Banknote,
     hint: "Hand the fare to your driver when the ride ends.",
   },
@@ -46,6 +52,17 @@ const loadRazorpayScript = () =>
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
+
+function StepLabel({ n, children }) {
+  return (
+    <p className="mb-4 flex items-center gap-2.5 text-sm font-semibold text-white">
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.08] text-[11px] text-amber tabular-nums">
+        {n}
+      </span>
+      {children}
+    </p>
+  );
+}
 
 function BookingForm() {
   const { user, isAuthenticated } = useContext(AuthContext);
@@ -82,6 +99,9 @@ function BookingForm() {
     setCoordinates(null);
     setDuration(DEFAULT_HOURS);
   };
+
+  const changeHours = (delta) =>
+    setDuration((h) => Math.min(24, Math.max(1, h + delta)));
 
   const handleGetLiveLocation = () => {
     if (!navigator.geolocation) {
@@ -244,18 +264,131 @@ function BookingForm() {
     <form
       id="book"
       onSubmit={handleBooking}
-      className="scroll-mt-24 overflow-hidden rounded-2xl border border-white/10 bg-panel/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9)] backdrop-blur-md"
+      className="relative scroll-mt-28 rounded-[1.75rem] border border-white/[0.08] bg-panel/90 shadow-[0_40px_120px_-30px_rgb(0_0_0/1),0_0_0_1px_rgb(255_193_7/0.04)] backdrop-blur-xl"
       noValidate
     >
-      <div className="flex items-center justify-between gap-4 px-6 pt-6 sm:px-7">
-        <h2 className="text-xl font-semibold text-white">Book your ride</h2>
-        <span className="rounded-full bg-amber/10 px-3 py-1 text-xs font-semibold text-amber">
-          {formatINR(HOURLY_RATE)} / hour
+      <div className="checker absolute inset-x-6 top-0 h-1.5 rounded-b-md [--sq:3px]" />
+
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4 px-5 pt-7 sm:px-7">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight text-white">
+            Book your driver
+          </h2>
+        </div>
+        <span className="rounded-full border border-amber/25 bg-amber/10 px-3 py-1.5 text-xs font-semibold text-amber tabular-nums">
+          {formatINR(HOURLY_RATE)}/hr
         </span>
       </div>
 
-      <div className="space-y-5 px-6 py-6 sm:px-7">
-        <div className="grid gap-5 sm:grid-cols-2">
+      {/* 1. Hours */}
+      <div className="px-5 pt-6 pb-7 sm:px-7">
+        <StepLabel n="1">How long do you need a driver?</StepLabel>
+        <div className="flex items-center justify-center gap-3 sm:gap-5">
+          <button
+            type="button"
+            onClick={() => changeHours(-1)}
+            disabled={duration <= 1}
+            aria-label="One hour less"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition-[background-color,border-color,transform] hover:border-amber/50 hover:text-amber active:scale-90 disabled:opacity-30"
+          >
+            <Minus size={18} />
+          </button>
+          <FareMeter
+            hours={duration}
+            fare={fare}
+            className="w-full max-w-[13.5rem]"
+          />
+          <button
+            type="button"
+            onClick={() => changeHours(1)}
+            disabled={duration >= 24}
+            aria-label="One hour more"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition-[background-color,border-color,transform] hover:border-amber/50 hover:text-amber active:scale-90 disabled:opacity-30"
+          >
+            <Plus size={18} />
+          </button>
+        </div>
+
+        <label htmlFor="book-duration" className="sr-only">
+          Duration in hours
+        </label>
+        <input
+          id="book-duration"
+          type="range"
+          min="1"
+          max="24"
+          step="1"
+          value={duration}
+          onChange={(e) => setDuration(Number(e.target.value))}
+          style={{ "--fill": `${fill}%` }}
+          className="-mt-3 w-full cursor-pointer"
+        />
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {quickHours.map((hours) => (
+            <button
+              key={hours}
+              type="button"
+              onClick={() => setDuration(hours)}
+              className={`rounded-full border py-2 text-xs font-semibold transition-[background-color,border-color,color] duration-200 ${
+                duration === hours
+                  ? "border-amber bg-amber text-black"
+                  : "border-white/10 text-mute hover:border-white/30 hover:text-white"
+              }`}
+            >
+              {hours} hrs
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="perforation mx-0 [--notch:#000]" />
+
+      {/* 2. Details */}
+      <div className="space-y-4 px-5 py-7 sm:px-7">
+        <StepLabel n="2">Where and who</StepLabel>
+
+        <div>
+          <label htmlFor="book-pickup" className="field-label">
+            Pickup address
+          </label>
+          <div className="group relative">
+            <MapPin size={17} className={iconClass} />
+            <input
+              id="book-pickup"
+              type="text"
+              autoComplete="street-address"
+              placeholder="House, street, area"
+              value={pickup}
+              onChange={(e) => {
+                setPickup(e.target.value);
+                setCoordinates(null);
+              }}
+              className="field pr-14 pl-11"
+            />
+            <button
+              type="button"
+              onClick={handleGetLiveLocation}
+              disabled={isLocating}
+              title="Use my current location"
+              aria-label="Use my current location"
+              className="absolute inset-y-2 right-2 flex w-10 items-center justify-center rounded-xl bg-amber/10 text-amber transition-colors duration-200 hover:bg-amber hover:text-black disabled:bg-transparent disabled:text-mute"
+            >
+              {isLocating ? (
+                <LoaderCircle size={18} className="animate-spin" />
+              ) : (
+                <LocateFixed size={18} />
+              )}
+            </button>
+          </div>
+          {coordinates && (
+            <p className="animate-fade mt-2 flex items-center gap-1.5 text-xs text-ok">
+              <Check size={14} /> Pinned to your live location
+            </p>
+          )}
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="book-name" className="field-label">
               Full name
@@ -279,12 +412,8 @@ function BookingForm() {
             <label htmlFor="book-phone" className="field-label">
               WhatsApp number
             </label>
-            <div className="group flex rounded-xl border border-edge bg-raise transition-[border-color,background-color,box-shadow] duration-200 focus-within:border-amber/70 focus-within:bg-[#222] focus-within:shadow-[0_0_0_3px_rgb(255_193_7/0.08)] hover:border-[#4a4a4a]">
-              <span className="flex items-center gap-2 border-r border-edge pr-3 pl-4 text-[15px] text-mute">
-                <Phone
-                  size={16}
-                  className="transition-colors group-focus-within:text-amber"
-                />
+            <div className="group flex rounded-2xl border border-line bg-coal transition-[border-color,background-color,box-shadow] duration-200 focus-within:border-amber/70 focus-within:bg-black focus-within:shadow-[0_0_0_4px_rgb(255_193_7/0.1)] hover:border-edge">
+              <span className="flex items-center border-r border-line pr-3 pl-4 text-[15px] font-medium text-mute transition-colors group-focus-within:text-amber">
                 +91
               </span>
               <input
@@ -296,7 +425,7 @@ function BookingForm() {
                 value={phone}
                 onChange={handlePhoneChange}
                 maxLength="10"
-                className="w-full min-w-0 bg-transparent px-3 py-3 text-[15px] text-white placeholder:text-dim"
+                className="w-full min-w-0 bg-transparent px-3 py-3.5 text-[15px] text-white tabular-nums placeholder:text-dim"
               />
             </div>
           </div>
@@ -319,85 +448,16 @@ function BookingForm() {
             />
           </div>
         </div>
+      </div>
 
-        <div>
-          <label htmlFor="book-pickup" className="field-label">
-            Pickup address
-          </label>
-          <div className="group relative">
-            <MapPin size={17} className={iconClass} />
-            <input
-              id="book-pickup"
-              type="text"
-              autoComplete="street-address"
-              placeholder="House, street, area"
-              value={pickup}
-              onChange={(e) => {
-                setPickup(e.target.value);
-                setCoordinates(null);
-              }}
-              className="field pr-12 pl-11"
-            />
-            <button
-              type="button"
-              onClick={handleGetLiveLocation}
-              disabled={isLocating}
-              title="Use my current location"
-              aria-label="Use my current location"
-              className="absolute inset-y-1.5 right-1.5 flex w-10 items-center justify-center rounded-lg text-amber transition-colors duration-200 hover:bg-amber/10 disabled:text-mute"
-            >
-              {isLocating ? (
-                <LoaderCircle size={18} className="animate-spin" />
-              ) : (
-                <LocateFixed size={18} />
-              )}
-            </button>
-          </div>
-        </div>
+      <div className="perforation [--notch:#000]" />
 
-        <div>
-          <div className="mb-2 flex items-baseline justify-between">
-            <label
-              htmlFor="book-duration"
-              className="text-sm font-medium text-fog"
-            >
-              Duration
-            </label>
-            <span className="text-sm font-semibold text-white tabular-nums">
-              {duration} {duration === 1 ? "hour" : "hours"}
-            </span>
-          </div>
-          <input
-            id="book-duration"
-            type="range"
-            min="1"
-            max="24"
-            step="1"
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            style={{ "--fill": `${fill}%` }}
-            className="w-full cursor-pointer"
-          />
-          <div className="mt-3 flex flex-wrap gap-2">
-            {quickHours.map((hours) => (
-              <button
-                key={hours}
-                type="button"
-                onClick={() => setDuration(hours)}
-                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors duration-200 ${
-                  duration === hours
-                    ? "border-white/80 bg-white text-black"
-                    : "border-edge text-mute hover:border-[#555] hover:text-white"
-                }`}
-              >
-                {hours} hrs
-              </button>
-            ))}
-          </div>
-        </div>
-
+      {/* 3. Payment */}
+      <div className="px-5 pt-7 pb-6 sm:px-7">
         <fieldset>
-          <legend className="field-label">Payment</legend>
+          <legend className="contents">
+            <StepLabel n="3">How will you pay?</StepLabel>
+          </legend>
           <div role="radiogroup" className="grid grid-cols-2 gap-3">
             {paymentOptions.map((option) => {
               const selected = paymentMethod === option.value;
@@ -409,42 +469,64 @@ function BookingForm() {
                   role="radio"
                   aria-checked={selected}
                   onClick={() => setPaymentMethod(option.value)}
-                  className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-3 text-left text-sm font-medium whitespace-nowrap transition-[border-color,background-color,color] duration-200 ${
+                  className={`relative flex flex-col items-start gap-3 rounded-2xl border p-3.5 text-left transition-[border-color,background-color] duration-200 sm:p-4 ${
                     selected
-                      ? "border-amber/60 bg-amber/[0.07] text-white"
-                      : "border-edge bg-raise text-mute hover:border-[#4a4a4a] hover:text-fog"
+                      ? "border-amber/70 bg-amber/[0.07]"
+                      : "border-line bg-coal hover:border-edge"
                   }`}
                 >
-                  <Icon
-                    size={18}
-                    className={`shrink-0 transition-colors ${selected ? "text-amber" : ""}`}
-                  />
-                  {option.label}
+                  <span
+                    className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+                      selected ? "bg-amber text-black" : "bg-white/5 text-mute"
+                    }`}
+                  >
+                    <Icon size={18} />
+                  </span>
+                  <span>
+                    <span
+                      className={`block text-sm font-semibold ${selected ? "text-white" : "text-fog"}`}
+                    >
+                      {option.label}
+                    </span>
+                    <span className="block text-xs text-mute">{option.sub}</span>
+                  </span>
+                  <span
+                    className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
+                      selected
+                        ? "border-amber bg-amber text-black"
+                        : "border-edge"
+                    }`}
+                  >
+                    {selected && <Check size={12} strokeWidth={3} />}
+                  </span>
                 </button>
               );
             })}
           </div>
           <p
             key={paymentMethod}
-            className="animate-fade mt-2 text-xs text-mute"
+            className="animate-fade mt-3 text-xs text-mute"
           >
             {paymentOptions.find((o) => o.value === paymentMethod).hint}
           </p>
         </fieldset>
       </div>
 
-      <div className="border-t border-line bg-coal/60 px-6 py-5 sm:px-7">
-        <div className="mb-4 flex items-end justify-between">
+      {/* Total */}
+      <div className="rounded-b-[1.75rem] border-t border-white/[0.06] bg-black/40 px-5 pt-5 pb-6 sm:px-7">
+        <div className="mb-4 flex items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-fog">Total fare</p>
-            <p className="text-xs text-mute tabular-nums">
+            <p className="text-sm font-medium text-fog">
+              Total fare
+            </p>
+            <p className="mt-0.5 text-xs text-dim tabular-nums">
               {duration} {duration === 1 ? "hr" : "hrs"} &times;{" "}
-              {formatINR(HOURLY_RATE)}
+              {formatINR(HOURLY_RATE)}, no surge
             </p>
           </div>
           <p
             key={fare}
-            className="animate-rise text-3xl font-semibold tracking-tight text-white tabular-nums"
+            className="animate-rise text-3xl font-bold tracking-tight text-white tabular-nums"
           >
             {formatINR(fare)}
           </p>
@@ -453,16 +535,24 @@ function BookingForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="btn-primary w-full py-3.5 text-base"
+          className="btn-primary group w-full py-4 text-base"
         >
-          {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
+          {isSubmitting ? (
+            <LoaderCircle size={18} className="animate-spin" />
+          ) : null}
           {paymentMethod === "Online"
             ? "Continue to payment"
             : "Confirm booking"}
+          {!isSubmitting && (
+            <ArrowRight
+              size={18}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          )}
         </button>
 
         {!isAuthenticated && (
-          <p className="mt-3 text-center text-sm text-mute">
+          <p className="mt-4 text-center text-sm text-mute">
             You&apos;ll need to{" "}
             <Link to="/login" className="link">
               log in
