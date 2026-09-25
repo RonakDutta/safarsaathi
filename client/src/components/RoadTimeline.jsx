@@ -1,17 +1,29 @@
 import { CarTaxiFront } from "lucide-react";
 import Reveal from "./Reveal";
 
-function Car({ vertical }) {
+function Car() {
   return (
-    <span
-      className={`absolute z-10 flex h-9 w-9 items-center justify-center rounded-xl bg-amber text-black shadow-[0_0_24px_rgb(255_193_7/0.6)] ${
-        vertical
-          ? "left-1/2 -translate-x-1/2 -translate-y-1/2 [animation:drive-y_9s_linear_infinite]"
-          : "top-1/2 -translate-x-1/2 -translate-y-1/2 [animation:drive-x_9s_linear_infinite]"
-      }`}
-    >
-      <CarTaxiFront size={18} className={vertical ? "rotate-180" : ""} />
+    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber text-black shadow-[0_0_24px_rgb(255_193_7/0.55)]">
+      <CarTaxiFront size={18} />
     </span>
+  );
+}
+
+// A track the size of the road that slides forward with transform, carrying
+// the taxi at its leading edge. Cheaper than animating left or top.
+function DrivingCar({ vertical }) {
+  return vertical ? (
+    <div className="absolute inset-0 [animation:drive-y_9s_linear_infinite] will-change-transform">
+      <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <Car />
+      </span>
+    </div>
+  ) : (
+    <div className="absolute inset-0 [animation:drive-x_9s_linear_infinite] will-change-transform">
+      <span className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2">
+        <Car />
+      </span>
+    </div>
   );
 }
 
@@ -24,10 +36,8 @@ function RoadTimeline({ steps }) {
       <div className="hidden lg:block">
         <Reveal className="relative h-16 rounded-full border border-white/[0.07] bg-coal">
           <div className="lane absolute inset-x-8 top-1/2 h-[3px] -translate-y-1/2 opacity-60" />
-          <div className="absolute inset-x-10">
-            <div className="relative h-16">
-              <Car />
-            </div>
+          <div className="absolute inset-y-0 inset-x-10 overflow-hidden">
+            <DrivingCar />
           </div>
           {steps.map((step, index) => (
             <span
@@ -70,25 +80,22 @@ function RoadTimeline({ steps }) {
 
       {/* Mobile and tablet */}
       <div className="relative lg:hidden">
-        <div className="absolute top-2 bottom-2 left-0 w-12 rounded-full border border-white/[0.07] bg-coal sm:w-14">
-          <div className="lane-y absolute inset-y-6 left-1/2 w-[3px] -translate-x-1/2 opacity-60" />
-          <div className="absolute inset-y-8 inset-x-0">
-            <Car vertical />
+        <div className="absolute top-0 bottom-0 left-0 w-10 overflow-hidden rounded-full border border-white/[0.07] bg-coal">
+          <div className="lane-y absolute inset-y-4 left-1/2 w-[3px] -translate-x-1/2 opacity-50" />
+          <div className="absolute inset-x-0 top-6 bottom-6">
+            <DrivingCar vertical />
           </div>
         </div>
 
-        <ol className="space-y-4 pl-16 sm:pl-20">
+        <ol className="space-y-3 pl-[3.25rem] sm:pl-14">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
               <Reveal as="li" key={step.title} delay={index * 80}>
-                <div className="card relative p-5 sm:p-6">
-                  <span className="absolute top-7 -left-10 flex h-6 -translate-x-1/2 items-center rounded-full border border-white/15 bg-black px-1.5 text-[9px] font-bold tracking-wider text-fog tabular-nums sm:-left-[3.25rem]">
-                    KM{String(index + 1).padStart(2, "0")}
-                  </span>
-                  <div className="flex items-start gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
-                      <Icon size={20} />
+                <div className="card relative p-4 sm:p-6">
+                  <div className="flex items-start gap-3.5">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
+                      <Icon size={19} />
                     </span>
                     <div>
                       <h3 className="font-semibold text-white">{step.title}</h3>

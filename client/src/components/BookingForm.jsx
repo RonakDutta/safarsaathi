@@ -264,7 +264,7 @@ function BookingForm() {
     <form
       id="book"
       onSubmit={handleBooking}
-      className="relative scroll-mt-28 rounded-[1.75rem] border border-white/[0.08] bg-panel/90 shadow-[0_40px_120px_-30px_rgb(0_0_0/1),0_0_0_1px_rgb(255_193_7/0.04)] backdrop-blur-xl"
+      className="relative scroll-mt-28 rounded-[1.75rem] border border-white/[0.08] bg-panel shadow-[0_40px_120px_-30px_rgb(0_0_0/1),0_0_0_1px_rgb(255_193_7/0.04)]"
       noValidate
     >
       <div className="checker absolute inset-x-6 top-0 h-1.5 rounded-b-md [--sq:3px]" />

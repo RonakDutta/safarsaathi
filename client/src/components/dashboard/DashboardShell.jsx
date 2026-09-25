@@ -20,7 +20,7 @@ function DashboardShell({
 
   return (
     <div className="min-h-screen bg-ink text-fog">
-      <div className="pointer-events-none fixed top-[-12rem] right-[-10rem] -z-0 h-[30rem] w-[30rem] rounded-full bg-amber/[0.07] blur-[140px]" />
+      <div className="pointer-events-none fixed top-[-12rem] right-[-10rem] -z-0 h-[30rem] w-[30rem] glow [--glow:0.098]" />
 
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-3 left-3 z-30 hidden w-64 flex-col overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-coal lg:flex">
@@ -97,7 +97,7 @@ function DashboardShell({
       </aside>
 
       {/* Mobile top bar */}
-      <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-black/80 backdrop-blur-xl lg:hidden">
+      <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-black/95 lg:hidden">
         <div className="flex h-16 items-center justify-between px-4 sm:px-6">
           <Logo suffix={label} className="text-lg" />
           <div className="flex items-center gap-2">
@@ -121,7 +121,7 @@ function DashboardShell({
 
       {/* Mobile bottom tabs */}
       <nav
-        className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-black/90 backdrop-blur-xl lg:hidden"
+        className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-white/[0.08] bg-black/95 lg:hidden"
         aria-label={`${label} sections`}
       >
         <div

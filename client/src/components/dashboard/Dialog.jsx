@@ -17,7 +17,7 @@ function Dialog({ open, onClose, title, description, children }) {
 
   return (
     <div
-      className="animate-fade fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="animate-fade fixed inset-0 z-50 flex items-end justify-center bg-black/85 p-0 sm:backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div

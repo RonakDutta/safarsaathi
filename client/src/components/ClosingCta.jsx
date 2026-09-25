@@ -8,7 +8,7 @@ function ClosingCta({ title, body, to = "/", action = "Book a driver" }) {
       <Reveal>
         <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/[0.07] bg-panel px-6 py-14 text-center sm:px-12 sm:py-20">
           <div className="bg-grid mask-fade absolute inset-0 -z-10" />
-          <div className="absolute bottom-[-10rem] left-1/2 -z-10 h-80 w-[36rem] -translate-x-1/2 rounded-full bg-amber/20 blur-[110px]" />
+          <div className="absolute bottom-[-10rem] left-1/2 -z-10 h-80 w-[36rem] -translate-x-1/2 glow [--glow:0.28]" />
           <div className="checker absolute inset-x-0 top-0 h-2 [--sq:4px]" />
 
           <h2 className="display mx-auto max-w-2xl text-3xl leading-tight sm:text-5xl">

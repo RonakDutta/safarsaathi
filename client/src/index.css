@@ -36,7 +36,16 @@ html {
 body {
   min-width: 320px;
   background-color: var(--color-ink);
-  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+a,
+button,
+[role="button"],
+input,
+label,
+select {
+  touch-action: manipulation;
 }
 
 ::selection {
@@ -172,7 +181,7 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 }
 
 @utility btn-secondary {
-  @apply btn border border-white/15 bg-white/[0.03] text-white backdrop-blur-sm hover:border-white/40 hover:bg-white/[0.08];
+  @apply btn border border-white/15 bg-white/[0.03] text-white hover:border-white/40 hover:bg-white/[0.08];
 }
 
 @utility btn-danger {
@@ -200,7 +209,7 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 }
 
 @utility chip {
-  @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-fog backdrop-blur-sm;
+  @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-fog;
 }
 
 @utility display {
@@ -236,8 +245,20 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   mask-image: linear-gradient(to bottom, #000 60%, transparent);
 }
 
-/* Dashed road centre line. Horizontal by default. */
-.lane {
+/* Dashed road centre line. The dashes live on a pseudo element that
+   slides with transform, so the motion stays on the GPU. */
+.lane,
+.lane-y {
+  overflow: hidden;
+}
+.lane::before,
+.lane-y::before {
+  content: "";
+  position: absolute;
+  will-change: transform;
+}
+.lane::before {
+  inset: 0 -28px 0 0;
   background-image: linear-gradient(
     to right,
     var(--color-amber) 0 55%,
@@ -246,7 +267,8 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   background-size: 28px 100%;
   animation: lane-x 1.4s linear infinite;
 }
-.lane-y {
+.lane-y::before {
+  inset: -28px 0 0 0;
   background-image: linear-gradient(
     to bottom,
     var(--color-amber) 0 55%,
@@ -254,6 +276,19 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   );
   background-size: 100% 28px;
   animation: lane-y 1.4s linear infinite;
+}
+
+/* Soft amber light. A radial gradient is far cheaper to paint on phones
+   than a big blurred circle. */
+.glow {
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 193 7 / var(--glow, 0.15)),
+    rgb(255 193 7 / calc(var(--glow, 0.15) * 0.35)) 55%,
+    transparent
+  );
 }
 
 .text-outline {
@@ -359,31 +394,33 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
 
 @keyframes lane-x {
   to {
-    background-position: -28px 0;
+    transform: translateX(-28px);
   }
 }
 
 @keyframes lane-y {
   to {
-    background-position: 0 28px;
+    transform: translateY(28px);
   }
 }
 
+/* Moves a full width (or full height) track, so the car rides along
+   with transform only. */
 @keyframes drive-x {
-  0% {
-    left: 0%;
+  from {
+    transform: translateX(0);
   }
-  100% {
-    left: 100%;
+  to {
+    transform: translateX(100%);
   }
 }
 
 @keyframes drive-y {
-  0% {
-    top: 0%;
+  from {
+    transform: translateY(0);
   }
-  100% {
-    top: 100%;
+  to {
+    transform: translateY(100%);
   }
 }
 
@@ -427,8 +464,12 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   animation: blink 1s steps(1) infinite;
 }
 
-.route-flow {
-  animation: route 1.6s linear infinite;
+/* Only animate the big hero route on larger screens; on phones it
+   would repaint a large area every frame for little gain. */
+@media (min-width: 1024px) {
+  .route-flow {
+    animation: route 1.6s linear infinite;
+  }
 }
 
 @keyframes route {
@@ -450,11 +491,16 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
    viewport; --delay staggers siblings. */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translate3d(0, 18px, 0);
   transition:
-    opacity 0.8s var(--ease-out-soft),
-    transform 0.8s var(--ease-out-soft);
+    opacity 0.7s var(--ease-out-soft),
+    transform 0.7s var(--ease-out-soft);
   transition-delay: var(--delay, 0ms);
+}
+@media (min-width: 1024px) {
+  .reveal {
+    transform: translate3d(0, 28px, 0);
+  }
 }
 
 .reveal.is-visible {

@@ -33,7 +33,7 @@ export function PageHero({ title, body, children, aside }) {
   return (
     <section className="relative isolate overflow-hidden">
       <div className="bg-grid mask-fade-b absolute inset-0 -z-10" />
-      <div className="absolute top-[-12rem] left-1/2 -z-10 h-[28rem] w-[46rem] -translate-x-1/2 rounded-full bg-amber/[0.13] blur-[130px]" />
+      <div className="absolute top-[-12rem] left-1/2 -z-10 h-[28rem] w-[46rem] -translate-x-1/2 glow [--glow:0.182]" />
 
       <div
         className={`container-page pt-32 pb-16 sm:pt-40 lg:pb-24 ${

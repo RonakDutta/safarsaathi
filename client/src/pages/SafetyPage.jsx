@@ -100,7 +100,9 @@ function FaqItem({ item, isOpen, onToggle, id }) {
           {item.question}
           <span
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-300 ${
-              isOpen ? "rotate-45 bg-amber text-black" : "bg-white/[0.06] text-amber"
+              isOpen
+                ? "rotate-45 bg-amber text-black"
+                : "bg-white/[0.06] text-amber"
             }`}
           >
             <Plus size={18} />
@@ -188,6 +190,10 @@ function SafetyPage() {
                     <img
                       src={detail.image}
                       loading="lazy"
+                      decoding="async"
+                      onError={(e) =>
+                        (e.currentTarget.style.visibility = "hidden")
+                      }
                       alt=""
                       className="duotone aspect-[16/9] w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
                     />
