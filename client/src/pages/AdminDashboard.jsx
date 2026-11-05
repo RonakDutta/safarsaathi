@@ -7,6 +7,7 @@ import {
   Users,
   Trash2,
   ArrowRight,
+  ChevronRight,
   IndianRupee,
   MapPin,
   Clock,
@@ -31,14 +32,15 @@ import {
   formatDay,
   getStatus,
   hoursLabel,
+  formatPhone,
+  telHref,
+  shortId,
 } from "../components/dashboard/format";
 
 function SectionTitle({ title, action }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-4">
-      <h2 className="text-base font-semibold text-white sm:text-lg">
-        {title}
-      </h2>
+      <h2 className="text-base font-semibold text-white sm:text-lg">{title}</h2>
       {action}
     </div>
   );
@@ -48,10 +50,13 @@ function TextButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:text-amber-soft"
+      className="group inline-flex items-center gap-1.5 rounded-full px-2 py-1 -mr-2 text-sm font-medium text-amber transition-colors hover:bg-amber/10"
     >
       {children}
-      <ArrowRight size={14} />
+      <ArrowRight
+        size={14}
+        className="transition-transform duration-200 group-hover:translate-x-0.5"
+      />
     </button>
   );
 }
@@ -59,7 +64,7 @@ function TextButton({ onClick, children }) {
 function Tabs({ tabs, value, onChange }) {
   return (
     <div
-      className="mb-6 flex w-full gap-1.5 overflow-x-auto rounded-xl border border-white/[0.07] bg-coal p-1.5 sm:w-fit"
+      className="mb-6 grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/[0.07] bg-coal p-1 sm:inline-grid sm:w-auto sm:auto-cols-fr"
       role="tablist"
     >
       {tabs.map((tab) => (
@@ -68,16 +73,18 @@ function Tabs({ tabs, value, onChange }) {
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`flex flex-1 shrink-0 items-center justify-center gap-2.5 rounded-lg px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
+          className={`flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-[background-color,color,transform] duration-200 active:scale-[0.97] sm:px-5 sm:text-sm ${
             value === tab.value
-              ? "bg-white/[0.08] text-white font-semibold"
+              ? "bg-white/[0.08] text-white"
               : "text-mute hover:text-white"
           }`}
         >
-          {tab.label}
+          <span className="truncate">{tab.label}</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
-              value === tab.value ? "bg-amber/15 text-amber" : "bg-white/[0.05] text-dim"
+            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+              value === tab.value
+                ? "bg-amber/15 text-amber"
+                : "bg-white/[0.05] text-dim"
             }`}
           >
             {tab.count}
@@ -91,7 +98,7 @@ function Tabs({ tabs, value, onChange }) {
 function Meta({ icon, children }) {
   const Icon = icon;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-fog/90">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 text-xs font-medium text-fog/90">
       <Icon size={13} className="shrink-0 text-mute" />
       <span>{children}</span>
     </span>
@@ -303,27 +310,35 @@ const AdminDashboard = () => {
               {pendingBookings.length > 0 ? (
                 <ul className="surface divide-y divide-white/[0.06] overflow-hidden">
                   {pendingBookings.slice(0, 5).map((b) => (
-                    <li
-                      key={b.booking_id}
-                      className="flex items-center gap-4 px-4 py-4 sm:px-5"
-                    >
-                      <MapPin size={18} className="shrink-0 text-amber" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-white">
-                          {b.user_name}
-                        </p>
-                        <p className="truncate text-sm text-mute">
-                          {b.pickup_location}
-                        </p>
-                      </div>
-                      <div className="shrink-0 text-right text-sm">
-                        <p className="font-semibold text-white tabular-nums">
-                          {hoursLabel(b.duration)}
-                        </p>
-                        <p className="hidden text-xs text-mute sm:block">
-                          {formatDate(b.created_at)}
-                        </p>
-                      </div>
+                    <li key={b.booking_id}>
+                      <button
+                        onClick={() => showBookings("pending")}
+                        className="group flex w-full items-center gap-4 px-4 py-4 text-left transition-colors hover:bg-white/[0.02] sm:px-5"
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber/10 text-amber">
+                          <MapPin size={18} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-white">
+                            {b.user_name}
+                          </p>
+                          <p className="truncate text-sm text-mute">
+                            {b.pickup_location}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-right text-sm">
+                          <p className="font-semibold text-white tabular-nums">
+                            {hoursLabel(b.duration)}
+                          </p>
+                          <p className="hidden text-xs text-mute sm:block">
+                            {formatDate(b.created_at)}
+                          </p>
+                        </div>
+                        <ChevronRight
+                          size={16}
+                          className="-mr-1 shrink-0 text-dim transition-transform duration-200 group-hover:translate-x-0.5"
+                        />
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -350,21 +365,27 @@ const AdminDashboard = () => {
               {pendingApps.length > 0 ? (
                 <ul className="surface divide-y divide-white/[0.06] overflow-hidden">
                   {pendingApps.slice(0, 5).map((app) => (
-                    <li
-                      key={app.application_id}
-                      className="flex items-center gap-4 px-4 py-4 sm:px-5"
-                    >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-sm font-semibold text-white">
-                        {(app.full_name || "?").charAt(0).toUpperCase()}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-white">
-                          {app.full_name}
-                        </p>
-                        <p className="truncate text-sm text-mute">
-                          {app.car_model}
-                        </p>
-                      </div>
+                    <li key={app.application_id}>
+                      <button
+                        onClick={() => setActiveTab("applications")}
+                        className="group flex w-full items-center gap-4 px-4 py-4 text-left transition-colors hover:bg-white/[0.02] sm:px-5"
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-sm font-semibold text-white">
+                          {(app.full_name || "?").charAt(0).toUpperCase()}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium text-white">
+                            {app.full_name}
+                          </p>
+                          <p className="truncate text-sm text-mute">
+                            {app.car_model}
+                          </p>
+                        </div>
+                        <ChevronRight
+                          size={16}
+                          className="-mr-1 shrink-0 text-dim transition-transform duration-200 group-hover:translate-x-0.5"
+                        />
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -390,7 +411,7 @@ const AdminDashboard = () => {
                   return (
                     <li
                       key={b.booking_id}
-                      className="grid grid-cols-[1fr_auto] gap-x-6 gap-y-1 px-4 py-4 sm:px-5 md:grid-cols-[10rem_1fr_9rem_9rem] md:items-center"
+                      className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 px-4 py-3.5 sm:px-5 md:grid-cols-[11rem_minmax(0,1fr)_8rem_9rem] md:items-center md:gap-x-6"
                     >
                       <p className="truncate font-medium text-white">
                         {b.user_name}
@@ -399,7 +420,7 @@ const AdminDashboard = () => {
                         {b.pickup_location}
                       </p>
                       <p className="hidden text-sm text-mute md:block">
-                        {hoursLabel(b.duration)}, {b.payment_method}
+                        {hoursLabel(b.duration)} · {b.payment_method}
                       </p>
                       <p className="col-start-2 row-start-1 text-right md:col-start-auto md:row-start-auto">
                         <span className={status.className}>{status.label}</span>
@@ -432,7 +453,7 @@ const AdminDashboard = () => {
               },
               {
                 value: "history",
-                label: "Assigned and completed",
+                label: "Assigned & done",
                 count: otherBookings.length,
               },
             ]}
@@ -442,38 +463,45 @@ const AdminDashboard = () => {
             <ul className="space-y-3">
               {visibleBookings.map((b) => {
                 const status = getStatus(b.status);
+                const isPending = b.status === "pending";
                 return (
                   <li
                     key={b.booking_id}
-                    className="surface grid gap-4 p-4 sm:p-5 lg:grid-cols-[1.1fr_1.6fr_auto] lg:items-center lg:gap-8 lg:px-6"
+                    className="surface lift grid gap-4 p-4 sm:p-5 lg:grid-cols-[12rem_minmax(0,1fr)_auto] lg:items-center lg:gap-8 lg:px-6"
                   >
-                    <div className="flex items-start justify-between gap-3 lg:block">
+                    <div className="flex min-w-0 items-start justify-between gap-3 lg:flex-col lg:justify-start lg:gap-1.5">
                       <div className="min-w-0">
                         <p className="truncate text-base font-semibold text-white">
                           {b.user_name}
                         </p>
                         <a
-                          href={`tel:+${b.phone}`}
-                          className="mt-0.5 block text-sm text-mute tabular-nums hover:text-amber"
+                          href={telHref(b.phone)}
+                          className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-mute tabular-nums transition-colors hover:text-amber"
                         >
-                          +{b.phone}
+                          <Phone size={13} className="shrink-0" />
+                          {formatPhone(b.phone)}
                         </a>
                       </div>
                       <span
-                        className="mt-1.5 inline-block shrink-0 font-mono text-[11px] text-dim tabular-nums"
+                        className="shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[11px] font-medium tracking-wide text-dim tabular-nums"
                         title={b.booking_id}
                       >
-                        #{b.booking_id.slice(0, 8)}
+                        {shortId(b.booking_id)}
                       </span>
                     </div>
 
                     <div className="min-w-0">
-                      <p className="flex gap-2 text-sm leading-relaxed text-fog lg:line-clamp-2">
+                      <p className="flex gap-2 text-sm leading-relaxed text-fog">
                         <MapPin
                           size={15}
-                          className="mt-1 shrink-0 text-amber"
+                          className="mt-[3px] shrink-0 text-amber"
                         />
-                        <span>{b.pickup_location}</span>
+                        <span
+                          className="min-w-0 lg:line-clamp-2"
+                          title={b.pickup_location}
+                        >
+                          {b.pickup_location}
+                        </span>
                       </p>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
                         <Meta icon={Clock}>{hoursLabel(b.duration)}</Meta>
@@ -484,8 +512,8 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    {b.status === "pending" ? (
-                      <div className="flex items-center gap-2.5 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
+                    {isPending ? (
+                      <div className="flex items-center gap-2 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
                         <select
                           aria-label={`Driver for booking ${b.booking_id}`}
                           className="field min-w-0 flex-1 py-2.5 text-sm lg:w-48 lg:flex-none"
@@ -506,13 +534,13 @@ const AdminDashboard = () => {
                         </select>
                         <button
                           onClick={() => handleAssign(b.booking_id)}
-                          className="btn-primary shrink-0 px-5 py-2.5 text-sm font-semibold"
+                          className="btn-primary shrink-0 px-5 py-2.5"
                         >
                           Assign
                         </button>
                         <button
                           onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger shrink-0 flex h-10 w-10 items-center justify-center rounded-full p-0"
+                          className="btn-danger h-10 w-10 shrink-0 p-0"
                           aria-label={`Delete booking ${b.booking_id}`}
                           title="Delete booking"
                         >
@@ -520,15 +548,15 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between border-t border-white/[0.06] pt-3 lg:border-0 lg:pt-0 lg:justify-end gap-3">
+                      <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4 lg:w-48 lg:justify-end lg:border-0 lg:pt-0">
                         <span className={status.className}>{status.label}</span>
                         <button
                           onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger shrink-0 flex h-9 w-9 items-center justify-center rounded-full p-0"
+                          className="btn-danger h-10 w-10 shrink-0 p-0"
                           aria-label={`Delete booking ${b.booking_id}`}
                           title="Delete booking"
                         >
-                          <Trash2 size={15} />
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     )}
@@ -560,24 +588,26 @@ const AdminDashboard = () => {
               {pendingApps.map((app) => (
                 <li
                   key={app.application_id}
-                  className="surface flex flex-col p-5 sm:p-6"
+                  className="surface lift flex flex-col p-5 sm:p-6"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.06] font-semibold text-white">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber/10 font-semibold text-amber">
                       {(app.full_name || "?").charAt(0).toUpperCase()}
                     </span>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-white">
                         {app.full_name}
                       </p>
-                      <p className="truncate text-sm text-mute">
-                        {app.email}
-                      </p>
+                      <p className="truncate text-sm text-mute">{app.email}</p>
                     </div>
                   </div>
-                  <dl className="mt-5 grid gap-2 text-sm">
+                  <dl className="mt-5 grid gap-1 rounded-xl bg-white/[0.02] p-3 text-sm">
                     {[
-                      { icon: Phone, label: "Phone", value: app.phone },
+                      {
+                        icon: Phone,
+                        label: "Phone",
+                        value: formatPhone(app.phone),
+                      },
                       { icon: CarFront, label: "Car", value: app.car_model },
                       {
                         icon: IdCard,
@@ -589,13 +619,13 @@ const AdminDashboard = () => {
                       return (
                         <div
                           key={row.label}
-                          className="flex items-center gap-3 py-1"
+                          className="flex items-center gap-3 px-1 py-1.5"
                         >
                           <Icon size={15} className="shrink-0 text-dim" />
                           <dt className="w-16 shrink-0 text-mute">
                             {row.label}
                           </dt>
-                          <dd className="min-w-0 break-all text-fog tabular-nums">
+                          <dd className="min-w-0 break-words text-fog tabular-nums">
                             {row.value}
                           </dd>
                         </div>
@@ -607,7 +637,7 @@ const AdminDashboard = () => {
                       Applied {formatDay(app.applied_at)}
                     </p>
                   )}
-                  <div className="mt-5 grid grid-cols-2 gap-2">
+                  <div className="mt-auto grid grid-cols-2 gap-2 pt-5">
                     <button
                       onClick={() => handleReject(app.application_id)}
                       className="btn-danger"
@@ -647,13 +677,11 @@ const AdminDashboard = () => {
               {driverList.map((driver) => (
                 <li
                   key={driver.user_id}
-                  className="surface flex flex-col p-5 sm:p-6"
+                  className="surface lift flex flex-col p-5 sm:p-6"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.06] font-semibold text-white"
-                      >
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber/10 font-semibold text-amber">
                         {(driver.full_name || "?").charAt(0).toUpperCase()}
                       </span>
                       <div className="min-w-0">
@@ -675,7 +703,7 @@ const AdminDashboard = () => {
                   <div className="mt-5 space-y-1.5 border-t border-white/[0.06] pt-4 text-sm">
                     <p className="flex items-center gap-2.5 truncate text-fog tabular-nums">
                       <Phone size={14} className="shrink-0 text-dim" />
-                      {driver.phone_number || "No phone on file"}
+                      {formatPhone(driver.phone_number) || "No phone on file"}
                     </p>
                     <p className="flex items-center gap-2.5 truncate text-fog">
                       <CarFront size={14} className="shrink-0 text-dim" />

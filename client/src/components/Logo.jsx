@@ -11,7 +11,7 @@ function Logo({ suffix, className = "", onClick }) {
         Safar<span className="text-amber">Saathi</span>
       </span>
       {suffix && (
-        <span className="hidden rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] min-[400px]:inline font-medium tracking-wide text-mute uppercase">
+        <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] leading-4 font-semibold tracking-wider text-mute uppercase">
           {suffix}
         </span>
       )}

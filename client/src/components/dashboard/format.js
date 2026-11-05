@@ -52,3 +52,26 @@ export const mapsUrl = (booking) => {
 
 export const hoursLabel = (hours) =>
   `${hours} ${Number(hours) === 1 ? "hr" : "hrs"}`;
+
+// "919876543210" or "9876543210" -> "+91 98765 43210"
+export const formatPhone = (value) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  const local =
+    digits.length === 12 && digits.startsWith("91")
+      ? digits.slice(2)
+      : digits.length === 10
+        ? digits
+        : null;
+  if (!local) return value ? String(value) : "";
+  return `+91 ${local.slice(0, 5)} ${local.slice(5)}`;
+};
+
+export const telHref = (value) => {
+  const digits = String(value || "").replace(/\D/g, "");
+  return `tel:+${digits.length === 10 ? `91${digits}` : digits}`;
+};
+
+export const shortId = (id) =>
+  `#${String(id || "")
+    .slice(0, 8)
+    .toUpperCase()}`;

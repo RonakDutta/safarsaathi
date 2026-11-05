@@ -90,7 +90,7 @@ function Services() {
         </div>
       </PageHero>
 
-      <section className="container-page py-24">
+      <section className="container-page py-20 sm:py-24">
         <SectionHeading
           title="Pick the kind of day you're having."
           body={`Every option is billed at ${formatINR(HOURLY_RATE)} an hour.`}
@@ -106,13 +106,15 @@ function Services() {
                 className={`flex flex-col rounded-3xl p-7 sm:p-8 ${
                   type.popular
                     ? "bg-amber text-black"
-                    : "border border-white/[0.07] bg-panel"
+                    : "lift border border-white/[0.07] bg-panel"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span
                     className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                      type.popular ? "bg-black text-amber" : "bg-amber/10 text-amber"
+                      type.popular
+                        ? "bg-black text-amber"
+                        : "bg-amber/10 text-amber"
                     }`}
                   >
                     <Icon size={22} />
@@ -185,7 +187,7 @@ function Services() {
         </div>
       </section>
 
-      <section className="bg-coal py-24">
+      <section className="bg-coal py-20 sm:py-24">
         <div className="container-page">
           <SectionHeading
             title="Included in every booking."
@@ -196,12 +198,17 @@ function Services() {
             {included.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="surface flex gap-5 p-7">
+                <div
+                  key={item.title}
+                  className="surface lift flex gap-4 p-5 sm:gap-5 sm:p-7"
+                >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
                     <Icon size={20} />
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                    <h3 className="text-lg font-semibold text-white">
+                      {item.title}
+                    </h3>
                     <p className="mt-1.5 text-sm leading-relaxed text-mute">
                       {item.body}
                     </p>
