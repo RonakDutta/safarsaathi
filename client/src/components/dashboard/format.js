@@ -3,11 +3,11 @@ const badge =
 
 export const statusMeta = {
   pending: {
-    label: "Needs a driver",
+    label: "Waiting",
     className: `${badge} bg-white/5 text-fog`,
   },
   confirmed: {
-    label: "Driver assigned",
+    label: "On a ride",
     className: `${badge} bg-amber/10 text-amber`,
   },
   completed: { label: "Completed", className: `${badge} bg-ok/10 text-ok` },
@@ -75,3 +75,29 @@ export const shortId = (id) =>
   `#${String(id || "")
     .slice(0, 8)
     .toUpperCase()}`;
+
+// A booking waiting this long without a driver is flagged in amber.
+export const WAIT_WARN_MINUTES = 30;
+
+export const minutesSince = (value, now) => {
+  const time = new Date(value).getTime();
+  if (!value || Number.isNaN(time)) return null;
+  return Math.max(0, Math.floor((now - time) / 60000));
+};
+
+// 45 -> "45m", 130 -> "2h 10m", 1500 -> "1d 1h"
+export const formatWait = (minutes) => {
+  if (minutes == null) return "";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    const rest = minutes % 60;
+    return rest ? `${hours}h ${rest}m` : `${hours}h`;
+  }
+  const days = Math.floor(hours / 24);
+  const rest = hours % 24;
+  return rest ? `${days}d ${rest}h` : `${days}d`;
+};
+
+const timeOf = (booking) => new Date(booking.created_at).getTime() || 0;
+export const oldestFirst = (a, b) => timeOf(a) - timeOf(b);

@@ -5,12 +5,10 @@ import {
   Ticket,
   UserCheck,
   Users,
-  Trash2,
   ArrowRight,
   ChevronRight,
   IndianRupee,
   MapPin,
-  Clock,
   Phone,
   CarFront,
   IdCard,
@@ -26,6 +24,7 @@ import DashboardShell, {
   EmptyState,
 } from "../components/dashboard/DashboardShell";
 import { ConfirmDialog } from "../components/dashboard/Dialog";
+import BookingCard from "../components/dashboard/BookingCard";
 import { formatINR } from "../lib/pricing";
 import {
   formatDate,
@@ -33,8 +32,10 @@ import {
   getStatus,
   hoursLabel,
   formatPhone,
-  telHref,
-  shortId,
+  formatWait,
+  minutesSince,
+  oldestFirst,
+  WAIT_WARN_MINUTES,
 } from "../components/dashboard/format";
 
 function SectionTitle({ title, action }) {
@@ -61,10 +62,33 @@ function TextButton({ onClick, children }) {
   );
 }
 
+function WaitText({ booking, now }) {
+  const minutes = minutesSince(booking.created_at, now);
+  const isLate = minutes != null && minutes >= WAIT_WARN_MINUTES;
+  return (
+    <div
+      className="shrink-0 text-right text-sm"
+      title={formatDate(booking.created_at)}
+    >
+      <p className="font-semibold text-white tabular-nums">
+        {hoursLabel(booking.duration)}
+      </p>
+      {minutes != null && (
+        <p
+          className={`text-xs tabular-nums ${isLate ? "font-medium text-amber" : "text-mute"}`}
+        >
+          {minutes < 1 ? "Just in" : `${formatWait(minutes)} wait`}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function Tabs({ tabs, value, onChange }) {
   return (
     <div
-      className="mb-6 grid w-full grid-cols-2 gap-1 rounded-2xl border border-white/[0.07] bg-coal p-1 sm:inline-grid sm:w-auto sm:auto-cols-fr"
+      className="mb-6 grid w-full gap-1 rounded-2xl border border-white/[0.07] bg-coal p-1 sm:inline-grid sm:w-auto"
+      style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
       role="tablist"
     >
       {tabs.map((tab) => (
@@ -73,7 +97,7 @@ function Tabs({ tabs, value, onChange }) {
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`flex min-w-0 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-[background-color,color,transform] duration-200 active:scale-[0.97] sm:px-5 sm:text-sm ${
+          className={`flex min-w-0 items-center justify-center gap-1.5 rounded-xl px-1.5 py-2.5 text-[13px] font-medium whitespace-nowrap transition-[background-color,color,transform] duration-200 active:scale-[0.97] sm:gap-2 sm:px-5 sm:text-sm ${
             value === tab.value
               ? "bg-white/[0.08] text-white"
               : "text-mute hover:text-white"
@@ -81,10 +105,14 @@ function Tabs({ tabs, value, onChange }) {
         >
           <span className="truncate">{tab.label}</span>
           <span
-            className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
-              value === tab.value
-                ? "bg-amber/15 text-amber"
-                : "bg-white/[0.05] text-dim"
+            className={`shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums sm:px-2 sm:text-xs ${
+              tab.highlight && tab.count > 0
+                ? "inline-flex bg-amber text-black"
+                : `hidden sm:inline-flex ${
+                    value === tab.value
+                      ? "bg-white/[0.1] text-white"
+                      : "bg-white/[0.05] text-dim"
+                  }`
             }`}
           >
             {tab.count}
@@ -92,16 +120,6 @@ function Tabs({ tabs, value, onChange }) {
         </button>
       ))}
     </div>
-  );
-}
-
-function Meta({ icon, children }) {
-  const Icon = icon;
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 text-xs font-medium text-fog/90">
-      <Icon size={13} className="shrink-0 text-mute" />
-      <span>{children}</span>
-    </span>
   );
 }
 
@@ -119,9 +137,17 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [applications, setApplications] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState({});
-  const [bookingView, setBookingView] = useState("pending");
+  const [bookingView, setBookingView] = useState("waiting");
   const [driverList, setDriverList] = useState([]);
   const [deleteBookingId, setDeleteBookingId] = useState(null);
+  const [assigningId, setAssigningId] = useState(null);
+  // Ticks so "Waiting 12m" stays current between data refreshes.
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const tick = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(tick);
+  }, []);
 
   const prevCompletedCount = useRef(0);
 
@@ -167,8 +193,16 @@ const AdminDashboard = () => {
     return () => clearInterval(pollInterval);
   }, [fetchData]);
 
-  const pendingBookings = bookings.filter((b) => b.status === "pending");
-  const otherBookings = bookings.filter((b) => b.status !== "pending");
+  // Waiting queue runs oldest first, so the longest wait is always on top.
+  const pendingBookings = bookings
+    .filter((b) => b.status === "pending")
+    .sort(oldestFirst);
+  const activeBookings = bookings.filter((b) => b.status === "confirmed");
+  const completedBookings = bookings.filter(
+    (b) => b.status !== "pending" && b.status !== "confirmed",
+  );
+  const driversById = new Map(driverList.map((d) => [d.user_id, d]));
+  const busyDriverIds = new Set(activeBookings.map((b) => b.driver_id));
   const pendingApps = applications.filter((app) => app.status === "pending");
 
   const handleApprove = async (id) => {
@@ -194,16 +228,21 @@ const AdminDashboard = () => {
   const handleAssign = async (bookingId) => {
     const driverId = selectedDriver[bookingId];
     if (!driverId) return toast.error("Select a driver first");
+    if (assigningId) return;
 
+    setAssigningId(bookingId);
     try {
       await axios.put("/api/admin/assign-driver", {
         booking_id: bookingId,
         driver_id: driverId,
       });
-      toast.success("Driver assigned");
-      fetchData();
+      const name = driversById.get(driverId)?.full_name;
+      toast.success(name ? `Assigned to ${name}` : "Driver assigned");
+      await fetchData();
     } catch (err) {
       toast.error(err.response?.data?.error || "Assignment failed");
+    } finally {
+      setAssigningId(null);
     }
   };
 
@@ -250,8 +289,27 @@ const AdminDashboard = () => {
     setActiveTab("bookings");
   };
 
-  const visibleBookings =
-    bookingView === "pending" ? pendingBookings : otherBookings;
+  const bookingViews = {
+    waiting: {
+      label: "Waiting",
+      list: pendingBookings,
+      description: "Oldest requests first. Pick a driver to confirm the ride.",
+      empty: "No one is waiting for a driver",
+    },
+    active: {
+      label: "On a ride",
+      list: activeBookings,
+      description: "Rides with a driver that haven't been closed yet.",
+      empty: "No rides in progress",
+    },
+    completed: {
+      label: "Completed",
+      list: completedBookings,
+      description: "Rides closed with the customer's PIN.",
+      empty: "No completed rides yet",
+    },
+  };
+  const currentView = bookingViews[bookingView] || bookingViews.waiting;
 
   return (
     <DashboardShell
@@ -301,7 +359,7 @@ const AdminDashboard = () => {
                 title="Waiting for a driver"
                 action={
                   pendingBookings.length > 0 && (
-                    <TextButton onClick={() => showBookings("pending")}>
+                    <TextButton onClick={() => showBookings("waiting")}>
                       Assign
                     </TextButton>
                   )
@@ -312,7 +370,7 @@ const AdminDashboard = () => {
                   {pendingBookings.slice(0, 5).map((b) => (
                     <li key={b.booking_id}>
                       <button
-                        onClick={() => showBookings("pending")}
+                        onClick={() => showBookings("waiting")}
                         className="group flex w-full items-center gap-4 px-4 py-4 text-left transition-colors hover:bg-white/[0.02] sm:px-5"
                       >
                         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber/10 text-amber">
@@ -326,14 +384,7 @@ const AdminDashboard = () => {
                             {b.pickup_location}
                           </p>
                         </div>
-                        <div className="shrink-0 text-right text-sm">
-                          <p className="font-semibold text-white tabular-nums">
-                            {hoursLabel(b.duration)}
-                          </p>
-                          <p className="hidden text-xs text-mute sm:block">
-                            {formatDate(b.created_at)}
-                          </p>
-                        </div>
+                        <WaitText booking={b} now={now} />
                         <ChevronRight
                           size={16}
                           className="-mr-1 shrink-0 text-dim transition-transform duration-200 group-hover:translate-x-0.5"
@@ -399,7 +450,7 @@ const AdminDashboard = () => {
             <SectionTitle
               title="Recent bookings"
               action={
-                <TextButton onClick={() => showBookings("history")}>
+                <TextButton onClick={() => setActiveTab("bookings")}>
                   All bookings
                 </TextButton>
               }
@@ -438,139 +489,50 @@ const AdminDashboard = () => {
 
       {activeTab === "bookings" && (
         <div>
-          <PageHeader
-            title="Bookings"
-            description="Pick a driver for each new request."
-          />
+          <PageHeader title="Bookings" description={currentView.description} />
           <Tabs
             value={bookingView}
             onChange={setBookingView}
-            tabs={[
-              {
-                value: "pending",
-                label: "Needs a driver",
-                count: pendingBookings.length,
-              },
-              {
-                value: "history",
-                label: "Assigned & done",
-                count: otherBookings.length,
-              },
-            ]}
+            tabs={Object.entries(bookingViews).map(([value, view]) => ({
+              value,
+              label: view.label,
+              count: view.list.length,
+              highlight: value === "waiting",
+            }))}
           />
 
-          {visibleBookings.length > 0 ? (
+          {currentView.list.length > 0 ? (
             <ul className="space-y-3">
-              {visibleBookings.map((b) => {
-                const status = getStatus(b.status);
-                const isPending = b.status === "pending";
-                return (
-                  <li
-                    key={b.booking_id}
-                    className="surface lift grid gap-4 p-4 sm:p-5 lg:grid-cols-[12rem_minmax(0,1fr)_auto] lg:items-center lg:gap-8 lg:px-6"
-                  >
-                    <div className="flex min-w-0 items-start justify-between gap-3 lg:flex-col lg:justify-start lg:gap-1.5">
-                      <div className="min-w-0">
-                        <p className="truncate text-base font-semibold text-white">
-                          {b.user_name}
-                        </p>
-                        <a
-                          href={telHref(b.phone)}
-                          className="mt-0.5 inline-flex items-center gap-1.5 text-sm text-mute tabular-nums transition-colors hover:text-amber"
-                        >
-                          <Phone size={13} className="shrink-0" />
-                          {formatPhone(b.phone)}
-                        </a>
-                      </div>
-                      <span
-                        className="shrink-0 rounded-md bg-white/[0.04] px-1.5 py-0.5 text-[11px] font-medium tracking-wide text-dim tabular-nums"
-                        title={b.booking_id}
-                      >
-                        {shortId(b.booking_id)}
-                      </span>
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="flex gap-2 text-sm leading-relaxed text-fog">
-                        <MapPin
-                          size={15}
-                          className="mt-[3px] shrink-0 text-amber"
-                        />
-                        <span
-                          className="min-w-0 lg:line-clamp-2"
-                          title={b.pickup_location}
-                        >
-                          {b.pickup_location}
-                        </span>
-                      </p>
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <Meta icon={Clock}>{hoursLabel(b.duration)}</Meta>
-                        <Meta icon={IndianRupee}>{b.payment_method}</Meta>
-                        {b.created_at && (
-                          <Meta icon={Ticket}>{formatDate(b.created_at)}</Meta>
-                        )}
-                      </div>
-                    </div>
-
-                    {isPending ? (
-                      <div className="flex items-center gap-2 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
-                        <select
-                          aria-label={`Driver for booking ${b.booking_id}`}
-                          className="field min-w-0 flex-1 py-2.5 text-sm lg:w-48 lg:flex-none"
-                          value={selectedDriver[b.booking_id] || ""}
-                          onChange={(e) =>
-                            setSelectedDriver({
-                              ...selectedDriver,
-                              [b.booking_id]: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="">Choose driver</option>
-                          {driverList.map((d) => (
-                            <option key={d.user_id} value={d.user_id}>
-                              {d.full_name}
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => handleAssign(b.booking_id)}
-                          className="btn-primary shrink-0 px-5 py-2.5"
-                        >
-                          Assign
-                        </button>
-                        <button
-                          onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger h-10 w-10 shrink-0 p-0"
-                          aria-label={`Delete booking ${b.booking_id}`}
-                          title="Delete booking"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4 lg:w-48 lg:justify-end lg:border-0 lg:pt-0">
-                        <span className={status.className}>{status.label}</span>
-                        <button
-                          onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger h-10 w-10 shrink-0 p-0"
-                          aria-label={`Delete booking ${b.booking_id}`}
-                          title="Delete booking"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </li>
-                );
-              })}
+              {currentView.list.map((b) => (
+                <BookingCard
+                  key={b.booking_id}
+                  booking={b}
+                  view={bookingView}
+                  now={now}
+                  drivers={driverList}
+                  driversById={driversById}
+                  busyIds={busyDriverIds}
+                  selectedDriverId={selectedDriver[b.booking_id]}
+                  onSelectDriver={(driverId) =>
+                    setSelectedDriver((current) => ({
+                      ...current,
+                      [b.booking_id]: driverId,
+                    }))
+                  }
+                  onAssign={() => handleAssign(b.booking_id)}
+                  isAssigning={assigningId === b.booking_id}
+                  onDelete={() => setDeleteBookingId(b.booking_id)}
+                />
+              ))}
             </ul>
           ) : (
             <EmptyState
-              icon={Ticket}
-              title={
-                bookingView === "pending"
-                  ? "No bookings are waiting for a driver"
-                  : "No assigned or completed bookings yet"
+              icon={bookingView === "waiting" ? Check : Ticket}
+              title={currentView.empty}
+              body={
+                bookingView === "waiting"
+                  ? "New requests will appear here, oldest first."
+                  : undefined
               }
             />
           )}

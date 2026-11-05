@@ -180,6 +180,10 @@ input[type="range"] {
   animation: drop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.animate-pop {
+  animation: pop 0.16s ease-out both;
+}
+
 /* Bottom sheet on phones, gentle pop on larger screens. */
 .animate-sheet {
   animation: sheet 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -198,6 +202,7 @@ input[type="range"] {
   }
   .animate-fade,
   .animate-drop,
+  .animate-pop,
   .animate-sheet {
     animation: none;
   }
