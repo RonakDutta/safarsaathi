@@ -241,12 +241,12 @@ function BookingForm() {
     <form
       id="book"
       onSubmit={handleBooking}
-      className="scroll-mt-24 rounded-2xl border border-white/10 bg-panel/95 p-5 backdrop-blur sm:p-7"
+      className="scroll-mt-24 rounded-3xl border border-white/10 bg-panel/95 p-5 shadow-2xl shadow-black/60 backdrop-blur sm:p-7"
       noValidate
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-semibold text-white">Book your driver</h2>
-        <span className="text-sm text-mute">
+        <span className="rounded-full border border-amber/20 bg-amber/10 px-3 py-1 text-xs font-semibold text-amber tabular-nums">
           {formatINR(HOURLY_RATE)}/hr
         </span>
       </div>
@@ -259,7 +259,7 @@ function BookingForm() {
             onClick={() => changeHours(-1)}
             disabled={duration <= 1}
             aria-label="One hour less"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/5 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white transition-[background-color,transform] duration-150 hover:bg-white/[0.06] active:scale-90 disabled:opacity-30"
           >
             <Minus size={18} />
           </button>
@@ -271,7 +271,7 @@ function BookingForm() {
             onClick={() => changeHours(1)}
             disabled={duration >= 24}
             aria-label="One hour more"
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/5 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white transition-[background-color,transform] duration-150 hover:bg-white/[0.06] active:scale-90 disabled:opacity-30"
           >
             <Plus size={18} />
           </button>
@@ -282,10 +282,11 @@ function BookingForm() {
               key={hours}
               type="button"
               onClick={() => setDuration(hours)}
-              className={`rounded-lg border py-2 text-xs font-medium transition-colors ${
+              aria-pressed={duration === hours}
+              className={`rounded-lg border py-2 text-xs font-medium transition-[border-color,background-color,color,transform] duration-150 active:scale-95 ${
                 duration === hours
-                  ? "border-amber text-amber"
-                  : "border-line text-mute hover:text-white"
+                  ? "border-amber bg-amber/10 text-amber"
+                  : "border-line text-mute hover:border-edge hover:text-white"
               }`}
             >
               {hours} hrs
@@ -318,7 +319,7 @@ function BookingForm() {
               disabled={isLocating}
               title="Use my current location"
               aria-label="Use my current location"
-              className="absolute inset-y-1.5 right-1.5 flex w-9 items-center justify-center rounded-lg text-amber hover:bg-amber/10 disabled:text-mute"
+              className="absolute inset-y-1.5 right-1.5 flex w-9 items-center justify-center rounded-lg text-amber transition-[background-color,transform] duration-150 hover:bg-amber/10 active:scale-90 disabled:text-mute"
             >
               {isLocating ? (
                 <LoaderCircle size={18} className="animate-spin" />
@@ -355,7 +356,7 @@ function BookingForm() {
             <label htmlFor="book-phone" className="field-label">
               WhatsApp number
             </label>
-            <div className="flex rounded-xl border border-line bg-coal transition-colors focus-within:border-amber/70 hover:border-edge">
+            <div className="field-group">
               <span className="flex items-center pl-4 text-sm text-mute">
                 +91
               </span>
@@ -403,17 +404,17 @@ function BookingForm() {
                 role="radio"
                 aria-checked={selected}
                 onClick={() => setPaymentMethod(option.value)}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-colors ${
+                className={`flex min-w-0 items-center gap-3 rounded-xl border p-3 text-left transition-[border-color,background-color,transform] duration-150 active:scale-[0.98] ${
                   selected
-                    ? "border-amber bg-amber/5"
+                    ? "border-amber bg-amber/[0.06]"
                     : "border-line hover:border-edge"
                 }`}
               >
                 <Icon
                   size={18}
-                  className={selected ? "text-amber" : "text-mute"}
+                  className={`shrink-0 ${selected ? "text-amber" : "text-mute"}`}
                 />
-                <span>
+                <span className="min-w-0">
                   <span className="block text-sm font-medium text-white">
                     {option.label}
                   </span>

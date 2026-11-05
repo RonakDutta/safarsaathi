@@ -17,25 +17,26 @@ function Dialog({ open, onClose, title, description, children }) {
 
   return (
     <div
-      className="animate-fade fixed inset-0 z-50 flex items-end justify-center bg-black/80 sm:items-center sm:p-4"
+      className="animate-fade fixed inset-0 z-50 flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className="w-full max-w-md rounded-t-2xl border border-white/[0.08] bg-panel px-5 pt-5 sm:rounded-2xl sm:p-7"
+        className="animate-sheet w-full max-w-md rounded-t-3xl border border-white/[0.08] bg-panel px-5 pt-3 shadow-2xl shadow-black sm:rounded-3xl sm:p-7"
       >
+        <span
+          aria-hidden="true"
+          className="mx-auto mb-4 block h-1 w-10 rounded-full bg-white/15 sm:hidden"
+        />
         <div className="flex items-start justify-between gap-4">
-          <h2
-            id="dialog-title"
-            className="text-xl font-semibold text-white"
-          >
+          <h2 id="dialog-title" className="text-xl font-semibold text-white">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="-mt-1 -mr-2 flex h-9 w-9 items-center justify-center rounded-lg text-mute hover:text-white"
+            className="-mt-1 -mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-mute transition-colors hover:bg-white/5 hover:text-white"
             aria-label="Close"
           >
             <X size={20} />

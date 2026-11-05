@@ -93,7 +93,7 @@ function SafetyPage() {
         body="Every driver is vetted by hand, every ride is assigned by our team, and every trip ends only when you say so."
       />
 
-      <section className="container-page py-24">
+      <section className="container-page py-20 sm:py-24">
         <SectionHeading
           title="Four checkpoints on every ride."
           body="Here is who touches your booking, from the moment a driver signs up to the moment you step out."
@@ -103,7 +103,7 @@ function SafetyPage() {
           {journey.map((step, index) => {
             const Icon = step.icon;
             return (
-              <li key={step.title} className="surface p-7">
+              <li key={step.title} className="surface lift p-6 sm:p-7">
                 <div className="flex items-center justify-between">
                   <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber/10 text-amber">
                     <Icon size={21} />
@@ -124,16 +124,16 @@ function SafetyPage() {
         </ol>
       </section>
 
-      <section className="bg-coal py-24">
+      <section className="bg-coal py-20 sm:py-24">
         <div className="container-page grid gap-4 md:grid-cols-2">
           {details.map((detail) => {
             const Icon = detail.icon;
             return (
-              <div key={detail.title} className="surface p-8 sm:p-10">
+              <div key={detail.title} className="surface lift p-6 sm:p-10">
                 <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber text-black">
                   <Icon size={22} />
                 </span>
-                <h2 className="mt-7 text-2xl font-bold tracking-normal text-white">
+                <h2 className="mt-6 text-xl leading-snug font-bold tracking-normal text-white sm:mt-7 sm:text-2xl">
                   {detail.title}
                 </h2>
                 <p className="mt-3 leading-relaxed text-mute">{detail.body}</p>
@@ -143,7 +143,7 @@ function SafetyPage() {
         </div>
       </section>
 
-      <section className="py-24">
+      <section className="py-20 sm:py-24">
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.5fr] lg:gap-16">
           <SectionHeading title="Questions we get asked." />
           <div className="divide-y divide-white/[0.06] border-y border-white/[0.06]">
@@ -152,16 +152,20 @@ function SafetyPage() {
               return (
                 <div key={item.question}>
                   <button
-                    className="flex w-full items-center justify-between gap-6 py-6 text-left text-lg font-medium text-white"
+                    className="group flex w-full items-center justify-between gap-6 py-5 text-left text-base font-medium text-white transition-colors hover:text-amber sm:py-6 sm:text-lg"
                     onClick={() => setOpenIndex(isOpen ? null : index)}
                     aria-expanded={isOpen}
                   >
                     {item.question}
-                    {isOpen ? (
-                      <Minus size={18} className="shrink-0 text-amber" />
-                    ) : (
-                      <Plus size={18} className="shrink-0 text-mute" />
-                    )}
+                    <span
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
+                        isOpen
+                          ? "border-amber/40 bg-amber/10 text-amber"
+                          : "border-white/10 text-mute group-hover:border-white/25"
+                      }`}
+                    >
+                      {isOpen ? <Minus size={16} /> : <Plus size={16} />}
+                    </span>
                   </button>
                   {isOpen && (
                     <p className="animate-fade pb-5 leading-relaxed text-mute">

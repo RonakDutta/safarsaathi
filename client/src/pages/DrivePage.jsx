@@ -81,7 +81,9 @@ function DrivePage() {
 
       if (user) {
         try {
-          const res = await axios.get("/api/driver-apply/my-application-status");
+          const res = await axios.get(
+            "/api/driver-apply/my-application-status",
+          );
           setAppStatus(res.data.status);
         } catch (err) {
           console.error("Error checking status", err);
@@ -158,7 +160,7 @@ function DrivePage() {
     <form
       id="apply"
       onSubmit={handleSubmit}
-      className="rounded-2xl border border-white/10 bg-panel/95 p-5 backdrop-blur sm:p-7"
+      className="rounded-3xl border border-white/10 bg-panel/95 p-5 shadow-2xl shadow-black/60 backdrop-blur sm:p-7"
     >
       <h2 className="text-lg font-semibold text-white">Driver application</h2>
       {appStatus === "rejected" ? (
@@ -193,7 +195,7 @@ function DrivePage() {
           <label htmlFor="apply-phone" className="field-label">
             Phone number
           </label>
-          <div className="flex rounded-xl border border-line bg-coal transition-colors focus-within:border-amber/70 hover:border-edge">
+          <div className="field-group">
             <span className="flex items-center pl-4 text-sm text-mute">
               +91
             </span>
@@ -262,9 +264,11 @@ function DrivePage() {
   ) : (
     <div
       id="apply"
-      className="rounded-2xl border border-white/10 bg-panel/95 p-6 backdrop-blur sm:p-8"
+      className="rounded-3xl border border-white/10 bg-panel/95 p-6 shadow-2xl shadow-black/60 backdrop-blur sm:p-8"
     >
-      <h2 className="text-xl font-semibold text-white">Start with an account</h2>
+      <h2 className="text-xl font-semibold text-white">
+        Start with an account
+      </h2>
       <p className="mt-3 leading-relaxed text-mute">
         Applications are linked to your SafarSaathi account, so we can upgrade
         it once you are approved.
@@ -295,14 +299,16 @@ function DrivePage() {
         <ul className="mt-8 space-y-3">
           {requirements.map((item) => (
             <li key={item} className="flex items-center gap-3 text-fog">
-              <Check size={16} className="shrink-0 text-amber" />
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-amber/15 text-amber">
+                <Check size={12} strokeWidth={3} />
+              </span>
               {item}
             </li>
           ))}
         </ul>
       </PageHero>
 
-      <section className="bg-coal py-24">
+      <section className="bg-coal py-20 sm:py-24">
         <div className="container-page">
           <SectionHeading
             title="What happens after you apply."
@@ -312,7 +318,7 @@ function DrivePage() {
             {afterApplying.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={step.title} className="surface p-7">
+                <div key={step.title} className="surface lift p-6 sm:p-7">
                   <div className="flex items-center justify-between">
                     <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber/10 text-amber">
                       <Icon size={21} />

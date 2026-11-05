@@ -26,6 +26,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   color-scheme: dark;
+  /* Never let decorative layers make the page pan sideways on phones. */
+  overflow-x: clip;
 }
 
 body {
@@ -68,7 +70,12 @@ input[type="range"] {
 }
 
 @utility field {
-  @apply w-full rounded-xl border border-line bg-coal px-4 py-3 text-sm text-white transition-colors duration-200 placeholder:text-dim hover:border-edge focus:border-amber/70 disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-line;
+  @apply w-full rounded-xl border border-line bg-coal px-4 py-3 text-sm text-white transition-[border-color,box-shadow] duration-200 placeholder:text-dim hover:border-edge focus:border-amber/70 focus:ring-4 focus:ring-amber/10 disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-line;
+}
+
+/* Wrapper that behaves like a field (e.g. +91 prefix + input). */
+@utility field-group {
+  @apply flex rounded-xl border border-line bg-coal transition-[border-color,box-shadow] duration-200 focus-within:border-amber/70 focus-within:ring-4 focus-within:ring-amber/10 hover:border-edge;
 }
 
 @utility field-label {
@@ -76,15 +83,15 @@ input[type="range"] {
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-normal transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-normal transition-[background-color,border-color,color,box-shadow,transform] duration-200 select-none active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50;
 }
 
 @utility btn-primary {
-  @apply btn bg-amber text-black hover:bg-amber-soft;
+  @apply btn bg-amber text-black shadow-[0_10px_30px_-12px_rgba(255,193,7,0.55)] hover:bg-amber-soft hover:shadow-[0_14px_36px_-12px_rgba(255,193,7,0.7)];
 }
 
 @utility btn-secondary {
-  @apply btn border border-white/15 text-white hover:border-white/40 hover:bg-white/5;
+  @apply btn border border-white/15 text-white hover:border-white/35 hover:bg-white/5;
 }
 
 @utility btn-danger {
@@ -101,6 +108,20 @@ input[type="range"] {
 
 @utility surface {
   @apply rounded-2xl border border-white/[0.07] bg-panel;
+}
+
+/* Cards that react to the pointer without moving the layout. */
+@utility lift {
+  @apply transition-[border-color,background-color] duration-300 hover:border-white/[0.14];
+}
+
+/* Fine dot texture for dark sections. */
+@utility bg-dots {
+  background-image: radial-gradient(
+    rgb(255 255 255 / 0.05) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
 }
 
 @utility display {
@@ -120,15 +141,69 @@ input[type="range"] {
   }
 }
 
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .animate-fade {
   animation: fade 0.3s ease-out both;
+}
+
+.animate-drop {
+  animation: drop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-pop {
+  animation: pop 0.16s ease-out both;
+}
+
+/* Bottom sheet on phones, gentle pop on larger screens. */
+.animate-sheet {
+  animation: sheet 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (min-width: 40rem) {
+  .animate-sheet {
+    animation-name: pop;
+    animation-duration: 0.22s;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .animate-fade {
+  .animate-fade,
+  .animate-drop,
+  .animate-pop,
+  .animate-sheet {
     animation: none;
   }
 }
