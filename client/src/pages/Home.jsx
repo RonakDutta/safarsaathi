@@ -1,43 +1,35 @@
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  ArrowDown,
-  ShieldCheck,
   Smartphone,
   UserCheck,
   CarFront,
-  CarTaxiFront,
   KeyRound,
   BadgeCheck,
   MessageCircle,
+  CreditCard,
   Check,
-  CheckCheck,
-  TrendingUp,
-  Ticket,
 } from "lucide-react";
 import PageLayout from "../components/PageLayout";
 import BookingForm from "../components/BookingForm";
-import Reveal from "../components/Reveal";
-import Marquee from "../components/Marquee";
-import RoadTimeline from "../components/RoadTimeline";
-import { SectionHeading } from "../components/Section";
+import {
+  PhotoBackdrop,
+  SectionHeading,
+  ClosingCta,
+} from "../components/Section";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
 import { images } from "../lib/images";
 
-const heroStats = [
-  { value: formatINR(HOURLY_RATE), label: "flat per hour" },
-  { value: "1 to 24", label: "hours per booking" },
-  { value: "4-digit", label: "PIN to end ride" },
+const heroPoints = [
+  "Checked by our team",
+  "No surge pricing",
+  "PIN-secured drop off",
 ];
 
-const ticker = [
-  "Verified drivers",
-  `${formatINR(HOURLY_RATE)} an hour`,
-  "No surge pricing",
-  "1 to 24 hours",
-  "Pay online or cash",
-  "Updates on WhatsApp",
-  "PIN-secured drop off",
+const heroStats = [
+  { value: formatINR(HOURLY_RATE), label: "flat per hour" },
+  { value: "1–24", label: "hours per booking" },
+  { value: "4-digit", label: "PIN to end ride" },
 ];
 
 const steps = [
@@ -63,452 +55,236 @@ const steps = [
   },
 ];
 
+const features = [
+  {
+    icon: BadgeCheck,
+    title: "Checked by a real person",
+    body: "Every driver's licence and vehicle are reviewed by our team before their first ride.",
+  },
+  {
+    icon: KeyRound,
+    title: "Your PIN ends the ride",
+    body: "The driver can't close the trip until you share the code sent only to you.",
+  },
+  {
+    icon: MessageCircle,
+    title: "Everything on WhatsApp",
+    body: "Confirmation, driver details and your PIN arrive in one chat.",
+  },
+  {
+    icon: CreditCard,
+    title: "Pay online or in cash",
+    body: "Prepay securely through Razorpay, or pay your driver when the ride ends.",
+  },
+];
+
 const examples = [
   { use: "Groceries and a few errands", hours: 2 },
-  { use: "Meetings across the city", hours: 5 },
   { use: "Airport run with a wait", hours: 4 },
+  { use: "Meetings across the city", hours: 5 },
   { use: "A wedding or a full day out", hours: 12 },
 ];
-
-const checks = ["Licence number", "Vehicle details", "Approved by our team"];
-
-function HeroRoute() {
-  return (
-    <svg
-      viewBox="0 0 1200 800"
-      preserveAspectRatio="xMidYMid slice"
-      className="absolute inset-0 h-full w-full"
-      aria-hidden="true"
-    >
-      <path
-        d="M-40 690 C 180 640, 260 470, 470 470 S 760 610, 900 420 S 1080 140, 1260 110"
-        fill="none"
-        stroke="rgb(255 255 255 / 0.05)"
-        strokeWidth="46"
-        strokeLinecap="round"
-      />
-      <path
-        d="M-40 690 C 180 640, 260 470, 470 470 S 760 610, 900 420 S 1080 140, 1260 110"
-        fill="none"
-        stroke="#ffc107"
-        strokeOpacity="0.55"
-        strokeWidth="2.5"
-        strokeDasharray="14 14"
-        className="route-flow"
-      />
-      <circle cx="470" cy="470" r="7" fill="#ffc107" />
-      <circle cx="470" cy="470" r="18" fill="#ffc107" fillOpacity="0.15" />
-      <circle cx="900" cy="420" r="5" fill="#fff" fillOpacity="0.5" />
-    </svg>
-  );
-}
-
-function PinDemo() {
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {["4", "8", "2", "9"].map((d, i) => (
-        <span
-          key={i}
-          className="flex h-14 items-center justify-center rounded-xl border border-amber/30 bg-black text-2xl font-bold text-amber tabular-nums"
-        >
-          {d}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-const whatsappSteps = [
-  { icon: Ticket, label: "Booking" },
-  { icon: UserCheck, label: "Driver" },
-  { icon: KeyRound, label: "PIN" },
-];
-
-// Three updates, joined by a dashed line, that land in one chat.
-function WhatsappFlow() {
-  return (
-    <div className="relative grid grid-cols-3">
-      <span className="absolute top-6 right-[16.66%] left-[16.66%] border-t-2 border-dashed border-amber/30" />
-      {whatsappSteps.map((step, i) => {
-        const Icon = step.icon;
-        const last = i === whatsappSteps.length - 1;
-        return (
-          <div key={step.label} className="relative flex flex-col items-center">
-            <span
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${
-                last
-                  ? "border-amber bg-amber text-black"
-                  : "border-amber/25 bg-black text-amber"
-              }`}
-            >
-              <Icon size={20} />
-            </span>
-            <span className="mt-2.5 flex items-center gap-1 text-xs font-medium text-fog">
-              {step.label}
-              <CheckCheck size={14} className="text-ok" />
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function SurgeDemo() {
-  return (
-    <div>
-      <svg viewBox="0 0 300 100" className="h-auto w-full" aria-hidden="true">
-        <path
-          d="M0 80 L30 70 L55 88 L80 40 L105 64 L130 22 L160 70 L185 34 L210 76 L240 18 L270 60 L300 44"
-          fill="none"
-          stroke="#3a3a3a"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M0 58 L300 58"
-          fill="none"
-          stroke="#ffc107"
-          strokeWidth="3"
-          strokeLinecap="round"
-        />
-      </svg>
-      <div className="mt-3 flex gap-5 text-xs">
-        <span className="flex items-center gap-2 text-fog">
-          <span className="h-[3px] w-4 rounded-full bg-amber" />
-          SafarSaathi
-        </span>
-        <span className="flex items-center gap-2 text-mute">
-          <span className="h-0.5 w-4 rounded-full bg-edge" />
-          Surge fares
-        </span>
-      </div>
-    </div>
-  );
-}
 
 function Home() {
   return (
     <PageLayout>
-      {/* Hero */}
       <section className="relative isolate overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="bg-grid mask-fade-b absolute inset-0" />
-          <div className="absolute top-[-10rem] left-[-10rem] h-[34rem] w-[34rem] glow [--glow:0.168]" />
-          <div className="absolute right-[-8rem] bottom-0 h-[26rem] w-[26rem] glow [--glow:0.098]" />
-          <HeroRoute />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-b from-transparent to-ink" />
-        </div>
+        <PhotoBackdrop src={images.taxi} position="35% center" />
 
-        <div className="container-page grid gap-12 pt-32 pb-16 sm:pt-40 lg:grid-cols-[minmax(0,1fr)_30rem] lg:gap-16 lg:pb-24 xl:gap-24">
-          <div className="animate-rise lg:sticky lg:top-32 lg:self-start">
-            <h1 className="display text-[2.9rem] leading-[0.98] sm:text-7xl xl:text-[5.5rem]">
+        <div className="container-page grid gap-12 pt-28 pb-20 sm:pt-36 lg:min-h-[52rem] lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-16 lg:pb-24">
+          <div>
+            <h1 className="display text-5xl leading-[1.05] sm:text-7xl">
               Hire a driver
               <br />
-              <span className="relative inline-block text-amber">
-                by the hour.
-                <span className="lane absolute -bottom-2 left-0 h-[5px] w-full rounded-full opacity-80 sm:-bottom-3" />
-              </span>
+              <span className="text-amber">by the hour.</span>
             </h1>
 
-            <p className="mt-9 max-w-lg text-base leading-relaxed text-fog/75 sm:text-lg">
+            <p className="mt-6 max-w-lg text-lg leading-relaxed text-fog/80">
               A verified professional driver for errands, office days, weddings
               or a safe ride home after a late night. One flat fare, from 1 to
               24 hours.
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row lg:hidden">
-              <a href="#book" className="btn-primary py-4 text-base">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href="#book" className="btn-primary px-7 py-3.5 lg:hidden">
                 Book a driver
-                <ArrowDown size={18} />
               </a>
-              <a href="#how" className="btn-secondary py-4 text-base">
+              <a href="#how" className="btn-secondary bg-black/30 px-7 py-3.5">
                 How it works
               </a>
             </div>
 
-            <dl className="mt-12 grid max-w-lg grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/[0.08] bg-white/[0.02]">
+            <ul className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-fog/80">
+              {heroPoints.map((point) => (
+                <li key={point} className="flex items-center gap-2">
+                  <Check size={16} className="text-amber" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+
+            <dl className="mt-10 flex max-w-md gap-10 border-t border-white/10 pt-6">
               {heroStats.map((stat) => (
-                <div key={stat.label} className="px-3 py-4 sm:px-5">
+                <div key={stat.label}>
                   <dt className="sr-only">{stat.label}</dt>
-                  <dd className="text-lg font-bold tracking-tight text-white tabular-nums sm:text-2xl">
+                  <dd className="text-2xl font-semibold text-white tabular-nums">
                     {stat.value}
                   </dd>
-                  <dd className="mt-0.5 text-[11px] leading-tight text-mute sm:text-xs">
-                    {stat.label}
-                  </dd>
+                  <dd className="mt-1 text-xs text-mute">{stat.label}</dd>
                 </div>
               ))}
             </dl>
-
-            <a
-              href="#how"
-              className="group mt-10 hidden items-center gap-3 text-sm font-medium text-mute transition-colors hover:text-white lg:inline-flex"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 transition-colors group-hover:border-amber group-hover:text-amber">
-                <ArrowDown size={16} />
-              </span>
-              See how a ride works
-            </a>
           </div>
 
-          <div className="animate-rise [animation-delay:150ms]">
-            <BookingForm />
-          </div>
+          <BookingForm />
         </div>
       </section>
 
-      <Marquee items={ticker} />
-
-      {/* How it works */}
-      <section id="how" className="container-page scroll-mt-24 py-20 lg:py-32">
-        <SectionHeading
-          title={
-            <>
-              From pickup to drop off,{" "}
-              <span className="text-mute">
-                you always know what&apos;s next.
-              </span>
-            </>
-          }
-          className="mb-12 lg:mb-16"
-        />
-        <RoadTimeline steps={steps} />
-      </section>
-
-      {/* Why us: bento */}
-      <section className="container-page pb-20 lg:pb-32">
-        <SectionHeading
-          title={
-            <>
-              Built on trust, <span className="text-amber">not surge.</span>
-            </>
-          }
-          className="mb-12 lg:mb-16"
-        />
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6 lg:gap-5">
-          {/* Price tile */}
-          <Reveal className="sm:col-span-2 lg:col-span-4">
-            <div className="group relative isolate flex h-full min-h-[17rem] flex-col justify-end sm:min-h-[22rem] overflow-hidden rounded-3xl border border-white/[0.07] p-6 sm:p-9">
-              <img
-                src={images.whyUs}
-                loading="lazy"
-                decoding="async"
-                onError={(e) => (e.currentTarget.style.visibility = "hidden")}
-                alt=""
-                className="duotone absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105"
-              />
-              <div className="absolute inset-0 -z-10 bg-linear-to-t from-black via-black/70 to-amber/10" />
-              <span className="chip absolute top-6 left-6 sm:top-8 sm:left-9">
-                <CarTaxiFront size={14} className="text-amber" />
-                All inclusive
-              </span>
-              <p className="text-6xl font-extrabold tracking-tighter text-amber tabular-nums sm:text-8xl">
-                {formatINR(HOURLY_RATE)}
-                <span className="text-2xl font-semibold tracking-tight text-white/60 sm:text-3xl">
-                  {" "}
-                  / hour
-                </span>
-              </p>
-              <p className="mt-3 max-w-md text-fog/80 sm:text-lg">
-                That is the whole price list. No per kilometre charges, no night
-                rates, no surprises.
-              </p>
-            </div>
-          </Reveal>
-
-          {/* Verification tile */}
-          <Reveal delay={80} className="lg:col-span-2">
-            <div className="surface flex h-full flex-col p-6 sm:p-7">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber text-black">
-                <BadgeCheck size={22} />
-              </span>
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                Checked by a real person
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-mute">
-                Every driver is reviewed by our team before they get a single
-                ride.
-              </p>
-              <ul className="mt-auto space-y-2 pt-6">
-                {checks.map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-black/40 px-3.5 py-2.5 text-sm text-fog"
+      <section id="how" className="scroll-mt-16 bg-coal py-24">
+        <div className="container-page">
+          <SectionHeading
+            title={
+              <>
+                From pickup to drop off,{" "}
+                <span className="text-mute">you always know what&apos;s next.</span>
+              </>
+            }
+            className="mb-14"
+          />
+          <ol className="relative grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
+            <span className="absolute top-6 right-[12%] left-[12%] hidden border-t border-dashed border-amber/30 lg:block" />
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <li key={step.title} className="relative">
+                  <span
+                    className={`relative flex h-12 w-12 items-center justify-center rounded-full border ${
+                      index === steps.length - 1
+                        ? "border-amber bg-amber text-black"
+                        : "border-amber/40 bg-coal text-amber"
+                    }`}
                   >
-                    {item}
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-ok/15 text-ok">
-                      <Check size={12} strokeWidth={3} />
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
-
-          {/* PIN tile */}
-          <Reveal delay={0} className="lg:col-span-2">
-            <div className="surface flex h-full flex-col p-6 sm:p-7">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.06] text-amber">
-                <KeyRound size={22} />
-              </span>
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                Your PIN ends the ride
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-mute">
-                The driver can&apos;t close the trip until you share the code
-                sent only to you.
-              </p>
-              <div className="mt-auto pt-6">
-                <PinDemo />
-              </div>
-            </div>
-          </Reveal>
-
-          {/* WhatsApp tile */}
-          <Reveal delay={80} className="lg:col-span-2">
-            <div className="surface flex h-full flex-col p-6 sm:p-7">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.06] text-amber">
-                <MessageCircle size={22} />
-              </span>
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                Everything on WhatsApp
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-mute">
-                Confirmation, driver details and your PIN in one chat.
-              </p>
-              <div className="mt-auto pt-6">
-                <WhatsappFlow />
-              </div>
-            </div>
-          </Reveal>
-
-          {/* No surge tile */}
-          <Reveal delay={160} className="sm:col-span-2 lg:col-span-2">
-            <div className="surface flex h-full flex-col p-6 sm:p-7">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.06] text-amber">
-                <TrendingUp size={22} />
-              </span>
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                No surge. Ever.
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-mute">
-                Rain, traffic or rush hour, the fare stays the same flat line.
-              </p>
-              <div className="mt-auto pt-6">
-                <SurgeDemo />
-              </div>
-            </div>
-          </Reveal>
+                    <Icon size={20} />
+                  </span>
+                  <p className="mt-6 text-xs font-semibold text-dim tabular-nums">
+                    STEP 0{index + 1}
+                  </p>
+                  <h3 className="mt-1 text-lg font-semibold text-white">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-mute">
+                    {step.body}
+                  </p>
+                </li>
+              );
+            })}
+          </ol>
         </div>
       </section>
 
-      {/* Fare card */}
-      <section className="relative overflow-hidden border-y border-white/[0.06] bg-coal py-20 lg:py-32">
-        <div className="bg-grid mask-fade absolute inset-0 opacity-60" />
-        <div className="container-page relative grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-20">
+      <section className="py-24">
+        <div className="container-page">
+          <SectionHeading
+            title={
+              <>
+                Built on trust, <span className="text-amber">not surge.</span>
+              </>
+            }
+            className="mb-14"
+          />
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <div className="relative isolate flex min-h-[22rem] flex-col justify-end overflow-hidden rounded-3xl p-7 sm:p-9 lg:row-span-2">
+              <img
+                src={images.driver}
+                alt="A driver at the wheel"
+                loading="lazy"
+                className="absolute inset-0 -z-20 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 -z-10 bg-linear-to-t from-black via-black/70 to-black/10" />
+              <p className="text-6xl font-bold tracking-tight text-amber tabular-nums">
+                {formatINR(HOURLY_RATE)}
+                <span className="text-2xl font-medium text-white/70"> / hour</span>
+              </p>
+              <p className="mt-3 max-w-sm text-fog/85">
+                That is the whole price list. No per kilometre charges, no night
+                rates, no surge. Ever.
+              </p>
+            </div>
+
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <div key={feature.title} className="surface p-7">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber/10 text-amber">
+                    <Icon size={21} />
+                  </span>
+                  <h3 className="mt-6 text-lg font-semibold text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-mute">
+                    {feature.body}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-coal py-24">
+        <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <SectionHeading
             title="Simple maths, worked out before you book."
             body={`Hours booked × ${formatINR(HOURLY_RATE)}. Traffic, distance or the time of day never change it.`}
           >
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <a href="#book" className="btn-primary group py-4">
+            <div className="mt-8 flex flex-wrap gap-3">
+              <a href="#book" className="btn-primary px-7 py-3.5">
                 Book now
-                <ArrowRight
-                  size={18}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
               </a>
-              <Link to="/services" className="btn-secondary py-4">
+              <Link to="/services" className="btn-secondary px-7 py-3.5">
                 See booking types
               </Link>
             </div>
           </SectionHeading>
 
-          <Reveal delay={120}>
-            <div className="relative mx-auto max-w-lg transition-transform duration-500 sm:-rotate-1 sm:hover:rotate-0">
-              <div className="rounded-t-3xl border border-b-0 border-white/[0.08] bg-panel px-6 pt-7 pb-4 sm:px-8">
-                <div className="flex items-center justify-between border-b border-dashed border-edge pb-5">
-                  <p className="font-semibold text-white">Fare card</p>
-                  <span className="rounded-full bg-amber px-3 py-1 text-xs font-bold text-black tabular-nums">
-                    {formatINR(HOURLY_RATE)}/hr
-                  </span>
-                </div>
-                <ul>
-                  {examples.map((row) => (
-                    <li
-                      key={row.use}
-                      className="flex items-end gap-3 py-3.5 text-sm sm:text-base"
-                    >
-                      <span className="min-w-0 text-fog">
-                        {row.use}
-                        <span className="block text-xs text-dim tabular-nums">
-                          {row.hours} hours
-                        </span>
-                      </span>
-                      <span className="mb-1.5 min-w-4 flex-1 border-b border-dotted border-edge" />
-                      <span className="font-semibold text-white tabular-nums">
-                        {formatINR(row.hours * HOURLY_RATE)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-2 flex items-center justify-between border-t border-dashed border-edge pt-5 pb-2">
-                  <span className="text-sm text-mute">Surge charges</span>
-                  <span className="font-bold text-amber tabular-nums">₹0</span>
-                </div>
-              </div>
-              {/* torn edge */}
-              <div
-                className="h-4 bg-panel"
-                style={{
-                  mask: "conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 20px 100%",
-                  WebkitMask:
-                    "conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 20px 100%",
-                }}
-              />
+          <div className="rounded-3xl border border-white/[0.08] bg-panel p-6 sm:p-8">
+            <div className="flex items-center justify-between pb-5">
+              <p className="text-lg font-semibold text-white">Fare card</p>
+              <span className="rounded-full bg-amber px-3 py-1 text-xs font-bold text-black tabular-nums">
+                {formatINR(HOURLY_RATE)}/hr
+              </span>
             </div>
-          </Reveal>
+            <ul className="divide-y divide-dashed divide-white/10 border-y border-dashed border-white/10">
+              {examples.map((row) => (
+                <li
+                  key={row.use}
+                  className="flex items-center justify-between gap-4 py-4"
+                >
+                  <span>
+                    <span className="block text-fog">{row.use}</span>
+                    <span className="text-xs text-dim">{row.hours} hours</span>
+                  </span>
+                  <span className="text-lg font-semibold text-white tabular-nums">
+                    {formatINR(row.hours * HOURLY_RATE)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex items-center justify-between pt-5">
+              <span className="text-mute">Surge charges</span>
+              <span className="text-lg font-bold text-amber">₹0</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Driver recruitment */}
-      <section className="container-page py-20 lg:py-28">
-        <Reveal>
-          <div className="relative isolate overflow-hidden rounded-[2rem] bg-amber text-black">
-            <div className="checker absolute inset-x-0 top-0 h-3 [--sq:6px]" />
-            <div className="checker absolute inset-x-0 bottom-0 h-3 [--sq:6px]" />
-            <CarTaxiFront
-              size={340}
-              strokeWidth={0.75}
-              className="pointer-events-none absolute -right-16 -bottom-20 -z-10 text-black/[0.08] sm:-right-6"
-            />
-            <div className="flex flex-col gap-8 px-6 py-14 sm:px-12 sm:py-16 lg:flex-row lg:items-end lg:justify-between lg:px-16 lg:py-20">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl leading-[1.02] font-extrabold tracking-tighter sm:text-6xl">
-                  Good driver with some free hours?
-                </h2>
-                <p className="mt-5 max-w-lg leading-relaxed text-black/70 sm:text-lg">
-                  Apply once, get verified by our team and start receiving
-                  bookings on your own driver dashboard.
-                </p>
-              </div>
-              <Link
-                to="/drive"
-                className="btn group shrink-0 bg-black px-8 py-4 text-base text-white hover:-translate-y-0.5 hover:bg-coal"
-              >
-                <ShieldCheck size={18} className="text-amber" />
-                Apply to drive
-                <ArrowRight
-                  size={18}
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </Link>
-            </div>
-          </div>
-        </Reveal>
-      </section>
+      <ClosingCta
+        title="Good driver with some free hours?"
+        body="Apply once, get verified by our team and start receiving bookings on your own driver dashboard."
+        to="/drive"
+        action="Apply to drive"
+      />
     </PageLayout>
   );
 }

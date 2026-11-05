@@ -2,13 +2,24 @@ const router = require("express").Router();
 const pool = require("../db");
 const authorize = require("../middleware/authorization");
 
-router.post("/", async (req, res) => {
+router.post("/", authorize, async (req, res) => {
   try {
-    const { name, email, phone, carModel, licenseNumber } = req.body;
+    const { name, phone, carModel, licenseNumber } = req.body;
 
-    if (!name || !email || !phone || !carModel || !licenseNumber) {
+    if (!name || !phone || !carModel || !licenseNumber) {
       return res.status(400).json({ error: "Please fill in all fields" });
     }
+
+    const userQuery = await pool.query(
+      "SELECT email FROM users WHERE user_id = $1",
+      [req.user.id],
+    );
+
+    if (userQuery.rows.length === 0) {
+      return res.status(404).json({ error: "Account not found" });
+    }
+
+    const email = userQuery.rows[0].email;
 
     const newApplication = await pool.query(
       "INSERT INTO driver_applications (full_name, email, phone, car_model, license_number) VALUES ($1, $2, $3, $4, $5) RETURNING *",
@@ -30,13 +41,16 @@ router.get("/my-application-status", authorize, async (req, res) => {
   try {
     const userQuery = await pool.query(
       "SELECT email FROM users WHERE user_id = $1",
-      [req.user],
+      [req.user.id],
     );
-    const userEmail = userQuery.rows[0].email;
+
+    if (userQuery.rows.length === 0) {
+      return res.json({ status: null });
+    }
 
     const appQuery = await pool.query(
       "SELECT status FROM driver_applications WHERE email = $1 ORDER BY application_id DESC LIMIT 1",
-      [userEmail],
+      [userQuery.rows[0].email],
     );
 
     if (appQuery.rows.length > 0) {
@@ -46,7 +60,7 @@ router.get("/my-application-status", authorize, async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 

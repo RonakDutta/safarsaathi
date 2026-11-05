@@ -1,6 +1,6 @@
 # 🚖 SafarSaathi: Hourly Driver & Cab Booking Platform
 
-**SafarSaathi** is a full-stack, production-grade hourly driver-on-demand and cab booking web application built for the Indian market. It enables customers to hire professional drivers for hourly durations (1–24 hours), processes online payments securely via Razorpay (with HMAC-SHA256 signature verification) or Cash, dispatches real-time WhatsApp & Email receipts via Twilio and Nodemailer, and provides dedicated Role-Based dashboards for **Admins** and **Drivers** with a 4-digit security PIN ride-completion mechanism.
+**SafarSaathi** is a full-stack, production-grade hourly driver-on-demand and cab booking web application built for the Indian market. It enables customers to hire professional drivers for hourly durations (1–24 hours), processes online payments securely via Razorpay (with HMAC-SHA256 signature verification) or Cash, dispatches real-time WhatsApp receipts via Twilio, and provides dedicated Role-Based dashboards for **Admins** and **Drivers** with a 4-digit security PIN ride-completion mechanism.
 
 ---
 
@@ -11,7 +11,7 @@
 4. [Authentication & RBAC Middleware](#-authentication--rbac-middleware)
 5. [Axios Token Header Interceptor](#-axios-token-header-interceptor)
 6. [Razorpay Integration & Fraud Verification](#-razorpay-integration--fraud-verification)
-7. [Automated Notifications (Twilio & Nodemailer)](#-automated-notifications-twilio--nodemailer)
+7. [Automated Notifications (Twilio)](#-automated-notifications-twilio)
 8. [Workflows & Security PIN System](#-workflows--security-pin-system)
 9. [Complete API Endpoints Reference](#-complete-api-endpoints-reference)
 10. [Local Development Setup](#-local-development-setup)
@@ -32,7 +32,7 @@
 * **Database Driver:** `pg` (PostgreSQL Client Pool connected to **Neon DB**)
 * **Authentication:** JSON Web Tokens (`jsonwebtoken`), Password Hashing (`bcryptjs`)
 * **Payment Processing:** Razorpay Node SDK (`razorpay`) + Node Native `crypto` (HMAC-SHA256)
-* **Messaging & Mail:** Twilio Node SDK (`twilio` for WhatsApp) + Nodemailer (`nodemailer` for SMTP Email)
+* **Messaging:** Twilio Node SDK (`twilio` for WhatsApp)
 
 ---
 
@@ -53,10 +53,12 @@ RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxx
 TWILIO_SID=ACxxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxx
 TWILIO_PHONE_NUMBER=+14155238886
+```
 
-# Nodemailer Credentials (Gmail SMTP)
-EMAIL_USER=safarsaathi.cab@gmail.com
-EMAIL_PASS=your_gmail_app_password
+Optionally create `client/.env` to point the frontend at a local backend:
+
+```env
+VITE_API_URL=http://localhost:5000
 ```
 
 ---
@@ -217,7 +219,7 @@ module.exports = async (req, res, next) => {
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://safarsaathi-irhg.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL || "https://safarsaathi-irhg.onrender.com",
 });
 
 instance.interceptors.request.use(
@@ -260,7 +262,7 @@ if (paymentMethod === "Online") {
 }
 ```
 
-### **2. Frontend Popup Trigger & Modal Dismissal Cleanup (`client/src/components/Body.jsx`)**
+### **2. Frontend Popup Trigger & Modal Dismissal Cleanup (`client/src/components/BookingForm.jsx`)**
 ```javascript
 const options = {
   key: res.data.key,
@@ -310,47 +312,28 @@ if (expectedSignature === razorpay_signature) {
 
 ---
 
-## 📲 Automated Notifications (Twilio & Nodemailer)
+## 📲 Automated Notifications (Twilio)
 
-Whenever a ride is booked or driver is assigned, the backend dispatches notifications via Twilio (WhatsApp) and Nodemailer (SMTP Email):
+Whenever a ride is booked or a driver is assigned, the backend sends a WhatsApp message through Twilio:
 
 ```javascript
 const twilio = require("twilio");
-const nodemailer = require("nodemailer");
 
 const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4, // Forces IPv4 resolution for Gmail SMTP
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-});
-
-const sendBookingMessage = async (name, pickup, duration, paymentMethod, phone, email) => {
+const sendBookingMessage = async (booking) => {
   const messageBody = `
 🚖 *New Booking Confirmed!*
-👤 *Name:* ${name}
-📍 *Pickup:* ${pickup}
-⏳ *Duration:* ${duration} Hours
-💳 *Payment:* ${paymentMethod}
-📞 *Phone:* +${phone}
-✉️ *Email:* ${email}`;
+👤 *Name:* ${booking.user_name}
+📍 *Pickup:* ${booking.pickup_location}
+⏳ *Duration:* ${booking.duration} Hours
+💳 *Payment:* ${booking.payment_method}
+Ref: #${booking.booking_id}`;
 
-  // Twilio WhatsApp Message
   await client.messages.create({
     body: messageBody,
     from: "whatsapp:" + process.env.TWILIO_PHONE_NUMBER,
-    to: `whatsapp:+${phone}`,
-  });
-
-  // Nodemailer SMTP Email
-  transporter.sendMail({
-    from: '"SafarSaathi Admin" <safarsaathi.cab@gmail.com>',
-    to: email,
-    subject: "Your SafarSaathi Ride is Confirmed! 🚖",
-    text: messageBody,
+    to: `whatsapp:+${booking.phone}`,
   });
 };
 ```
@@ -366,7 +349,7 @@ const sendBookingMessage = async (name, pickup, duration, paymentMethod, phone, 
                                            Generates 4-Digit PIN (e.g. 4829)
                                                             │
                                                             ▼
-                                           Sends WhatsApp/Email to Customer
+                                           Sends WhatsApp to Customer
                                                             │
                                                             ▼
                                            Driver Reaches Destination & Asks Customer
@@ -378,8 +361,8 @@ const sendBookingMessage = async (name, pickup, duration, paymentMethod, phone, 
                                            Server Compares PIN -> Status = 'completed'
 ```
 
-1. **Driver Onboarding:** User submits form at `/drive`. Admin reviews application at `/admin`. Upon approval, backend upgrades user to `role = 'driver'` and seeds default password `"driver123"` if account is new.
-2. **Driver Assignment:** Admin picks driver for booking (`PUT /api/admin/assign-driver`). Backend creates random 4-digit PIN (`Math.floor(1000 + Math.random() * 9000)`), stores it in `bookings.end_ride_pin`, and sends it to customer's WhatsApp & Email.
+1. **Driver Onboarding:** A logged-in user submits the form at `/drive`; the application is linked to their account email. Admin reviews it at `/admin`. Upon approval, backend upgrades that account to `role = 'driver'`.
+2. **Driver Assignment:** Admin picks driver for booking (`PUT /api/admin/assign-driver`). Backend creates random 4-digit PIN (`Math.floor(1000 + Math.random() * 9000)`), stores it in `bookings.end_ride_pin`, and sends it to customer's WhatsApp.
 3. **Ride Completion:** Driver opens `/driver` board. At trip end, driver prompts customer for PIN and submits it (`PUT /api/driver-board/complete/:id`). Backend checks PIN match. If match, trip status updates to `'completed'`.
 4. **Admin Live Polling:** Admin dashboard polls server every 20 seconds. Shows toast notification `"A driver just completed a ride! 🚖✅"` when new completed trip is detected.
 
@@ -389,23 +372,22 @@ const sendBookingMessage = async (name, pickup, duration, paymentMethod, phone, 
 
 | Method | Route Endpoint | Guard / Middleware | Purpose |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/auth/register` | Public | Register customer/driver account |
+| `POST` | `/auth/register` | Public | Register customer account |
 | `POST` | `/auth/login` | Public | Login and receive JWT token |
-| `POST` | `/api/book-ride/` | Public | Create ride booking & Razorpay order |
-| `POST` | `/api/book-ride/verify-payment` | Public | Verify Razorpay HMAC-SHA256 signature |
-| `POST` | `/api/book-ride/cancel-booking` | Public | Delete unpaid abandoned booking |
-| `POST` | `/api/driver-apply/` | Public | Submit driver application |
+| `POST` | `/api/book-ride/` | `authorization` | Create ride booking & Razorpay order |
+| `POST` | `/api/book-ride/verify-payment` | `authorization` | Verify Razorpay HMAC-SHA256 signature |
+| `POST` | `/api/book-ride/cancel-booking` | `authorization` | Delete unpaid abandoned online booking |
+| `POST` | `/api/driver-apply/` | `authorization` | Submit driver application |
 | `GET` | `/api/driver-apply/my-application-status` | `authorization` | Check application status |
 | `GET` | `/api/admin/stats` | `authorization` + `admin` | Fetch dashboard counts & revenue |
 | `GET` | `/api/admin/bookings` | `authorization` + `admin` | Fetch all trip bookings |
 | `DELETE`| `/api/admin/bookings/:id` | `authorization` + `admin` | Delete booking record |
 | `GET` | `/api/admin/applications` | `authorization` + `admin` | Fetch driver applications |
 | `PUT` | `/api/admin/applications/:id` | `authorization` + `admin` | Approve/Reject driver application |
-| `GET` | `/api/admin/drivers` | `authorization` + `admin` | Fetch active drivers list |
 | `GET` | `/api/admin/drivers-list` | `authorization` + `admin` | Fetch detailed drivers with trip count |
 | `PUT` | `/api/admin/assign-driver` | `authorization` + `admin` | Assign driver & dispatch 4-digit PIN |
 | `GET` | `/api/driver-board/my-trips` | `authorization` + `driver` | Fetch trips assigned to logged-in driver |
-| `PUT` | `/api/driver-board/complete/:id` | `authorization` | Verify 4-digit PIN & complete trip |
+| `PUT` | `/api/driver-board/complete/:id` | `authorization` + `driver` | Verify 4-digit PIN & complete trip |
 | `PUT` | `/api/driver-board/cancel/:id` | `authorization` + `driver` | Cancel trip and return to queue |
 
 ---

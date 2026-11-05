@@ -24,7 +24,7 @@ const Signup = () => {
     }
 
     setIsSubmitting(true);
-    const created = await register(name, email, password, "customer");
+    const created = await register(name, email, password);
     setIsSubmitting(false);
 
     if (created) {

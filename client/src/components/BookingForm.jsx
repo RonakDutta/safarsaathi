@@ -3,27 +3,19 @@ import { Link, useSearchParams } from "react-router-dom";
 import {
   LocateFixed,
   LoaderCircle,
-  User,
-  Mail,
-  MapPin,
-  CreditCard,
-  Banknote,
   Minus,
   Plus,
-  ArrowRight,
+  CreditCard,
+  Banknote,
   Check,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/authContext";
 import axios from "../api/axios";
 import { HOURLY_RATE, formatINR } from "../lib/pricing";
-import FareMeter from "./FareMeter";
 
 const DEFAULT_HOURS = 2;
 const quickHours = [2, 4, 8, 12];
-
-const iconClass =
-  "pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-dim transition-colors duration-200 group-focus-within:text-amber";
 
 const paymentOptions = [
   {
@@ -31,18 +23,15 @@ const paymentOptions = [
     label: "Pay online",
     sub: "UPI, card, netbanking",
     icon: CreditCard,
-    hint: "Paid securely through Razorpay before the ride.",
   },
   {
     value: "Cash",
     label: "Pay in cash",
     sub: "After the ride",
     icon: Banknote,
-    hint: "Hand the fare to your driver when the ride ends.",
   },
 ];
 
-// Inject the Razorpay checkout script on demand
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
     if (window.Razorpay) return resolve(true);
@@ -53,17 +42,6 @@ const loadRazorpayScript = () =>
     document.body.appendChild(script);
   });
 
-function StepLabel({ n, children }) {
-  return (
-    <p className="mb-4 flex items-center gap-2.5 text-sm font-semibold text-white">
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.08] text-[11px] text-amber tabular-nums">
-        {n}
-      </span>
-      {children}
-    </p>
-  );
-}
-
 function BookingForm() {
   const { user, isAuthenticated } = useContext(AuthContext);
 
@@ -72,7 +50,6 @@ function BookingForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [searchParams] = useSearchParams();
-  // Links like /?hours=8#book arrive with the duration already picked
   const [duration, setDuration] = useState(() => {
     const hours = Number(searchParams.get("hours"));
     return Number.isInteger(hours) && hours >= 1 && hours <= 24
@@ -84,7 +61,6 @@ function BookingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coordinates, setCoordinates] = useState(null);
 
-  // Auto-fill name and email if logged in
   useEffect(() => {
     if (isAuthenticated && user) {
       setName(user.full_name || user.name || "");
@@ -145,7 +121,12 @@ function BookingForm() {
   const handleBooking = async (e) => {
     e.preventDefault();
 
-    if (!name || !pickup || !phone || !duration || !email) {
+    if (!isAuthenticated) {
+      toast.error("Please log in to book a ride.");
+      return;
+    }
+
+    if (!name || !pickup || !phone || !email) {
       toast.error("Please fill in all the booking details.");
       return;
     }
@@ -155,17 +136,12 @@ function BookingForm() {
       return;
     }
 
-    if (!isAuthenticated) {
-      toast.error("Please log in to book a ride.");
-      return;
-    }
-
     const messageBody = {
       name,
       pickup,
       phone: "91" + phone,
       email,
-      duration: String(duration),
+      duration,
       paymentMethod,
       coordinates,
     };
@@ -181,6 +157,9 @@ function BookingForm() {
         if (!resScript) {
           toast.error("Razorpay failed to load. Are you online?", {
             id: loadingToast,
+          });
+          await axios.post("/api/book-ride/cancel-booking", {
+            bookingId: res.data.bookingId,
           });
           return;
         }
@@ -232,7 +211,7 @@ function BookingForm() {
 
         const paymentObject = new window.Razorpay(options);
         paymentObject.on("payment.failed", function () {
-          toast.error("Payment failed or cancelled.", { id: loadingToast });
+          toast.error("Payment failed. Please try again.");
         });
 
         toast.dismiss(loadingToast);
@@ -258,82 +237,55 @@ function BookingForm() {
     setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
   };
 
-  const fill = ((duration - 1) / 23) * 100;
-
   return (
     <form
       id="book"
       onSubmit={handleBooking}
-      className="relative scroll-mt-28 rounded-[1.75rem] border border-white/[0.08] bg-panel shadow-[0_40px_120px_-30px_rgb(0_0_0/1),0_0_0_1px_rgb(255_193_7/0.04)]"
+      className="scroll-mt-24 rounded-2xl border border-white/10 bg-panel/95 p-5 backdrop-blur sm:p-7"
       noValidate
     >
-      <div className="checker absolute inset-x-6 top-0 h-1.5 rounded-b-md [--sq:3px]" />
-
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 px-5 pt-7 sm:px-7">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-white">
-            Book your driver
-          </h2>
-        </div>
-        <span className="rounded-full border border-amber/25 bg-amber/10 px-3 py-1.5 text-xs font-semibold text-amber tabular-nums">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-white">Book your driver</h2>
+        <span className="text-sm text-mute">
           {formatINR(HOURLY_RATE)}/hr
         </span>
       </div>
 
-      {/* 1. Hours */}
-      <div className="px-5 pt-6 pb-7 sm:px-7">
-        <StepLabel n="1">How long do you need a driver?</StepLabel>
-        <div className="flex items-center justify-center gap-3 sm:gap-5">
+      <div className="mt-6">
+        <p className="field-label">Hours</p>
+        <div className="flex items-center justify-between rounded-xl border border-line bg-coal p-2">
           <button
             type="button"
             onClick={() => changeHours(-1)}
             disabled={duration <= 1}
             aria-label="One hour less"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition-[background-color,border-color,transform] hover:border-amber/50 hover:text-amber active:scale-90 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/5 disabled:opacity-30"
           >
             <Minus size={18} />
           </button>
-          <FareMeter
-            hours={duration}
-            fare={fare}
-            className="w-full max-w-[13.5rem]"
-          />
+          <p className="text-lg font-semibold text-white tabular-nums">
+            {duration} {duration === 1 ? "hour" : "hours"}
+          </p>
           <button
             type="button"
             onClick={() => changeHours(1)}
             disabled={duration >= 24}
             aria-label="One hour more"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white transition-[background-color,border-color,transform] hover:border-amber/50 hover:text-amber active:scale-90 disabled:opacity-30"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white hover:bg-white/5 disabled:opacity-30"
           >
             <Plus size={18} />
           </button>
         </div>
-
-        <label htmlFor="book-duration" className="sr-only">
-          Duration in hours
-        </label>
-        <input
-          id="book-duration"
-          type="range"
-          min="1"
-          max="24"
-          step="1"
-          value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
-          style={{ "--fill": `${fill}%` }}
-          className="-mt-3 w-full cursor-pointer"
-        />
-        <div className="mt-3 grid grid-cols-4 gap-2">
+        <div className="mt-2 grid grid-cols-4 gap-2">
           {quickHours.map((hours) => (
             <button
               key={hours}
               type="button"
               onClick={() => setDuration(hours)}
-              className={`rounded-full border py-2 text-xs font-semibold transition-[background-color,border-color,color] duration-200 ${
+              className={`rounded-lg border py-2 text-xs font-medium transition-colors ${
                 duration === hours
-                  ? "border-amber bg-amber text-black"
-                  : "border-white/10 text-mute hover:border-white/30 hover:text-white"
+                  ? "border-amber text-amber"
+                  : "border-line text-mute hover:text-white"
               }`}
             >
               {hours} hrs
@@ -342,18 +294,12 @@ function BookingForm() {
         </div>
       </div>
 
-      <div className="perforation mx-0 [--notch:#000]" />
-
-      {/* 2. Details */}
-      <div className="space-y-4 px-5 py-7 sm:px-7">
-        <StepLabel n="2">Where and who</StepLabel>
-
+      <div className="mt-6 space-y-4">
         <div>
           <label htmlFor="book-pickup" className="field-label">
             Pickup address
           </label>
-          <div className="group relative">
-            <MapPin size={17} className={iconClass} />
+          <div className="relative">
             <input
               id="book-pickup"
               type="text"
@@ -364,7 +310,7 @@ function BookingForm() {
                 setPickup(e.target.value);
                 setCoordinates(null);
               }}
-              className="field pr-14 pl-11"
+              className="field pr-12"
             />
             <button
               type="button"
@@ -372,7 +318,7 @@ function BookingForm() {
               disabled={isLocating}
               title="Use my current location"
               aria-label="Use my current location"
-              className="absolute inset-y-2 right-2 flex w-10 items-center justify-center rounded-xl bg-amber/10 text-amber transition-colors duration-200 hover:bg-amber hover:text-black disabled:bg-transparent disabled:text-mute"
+              className="absolute inset-y-1.5 right-1.5 flex w-9 items-center justify-center rounded-lg text-amber hover:bg-amber/10 disabled:text-mute"
             >
               {isLocating ? (
                 <LoaderCircle size={18} className="animate-spin" />
@@ -382,7 +328,7 @@ function BookingForm() {
             </button>
           </div>
           {coordinates && (
-            <p className="animate-fade mt-2 flex items-center gap-1.5 text-xs text-ok">
+            <p className="mt-2 flex items-center gap-1.5 text-xs text-ok">
               <Check size={14} /> Pinned to your live location
             </p>
           )}
@@ -393,27 +339,24 @@ function BookingForm() {
             <label htmlFor="book-name" className="field-label">
               Full name
             </label>
-            <div className="group relative">
-              <User size={17} className={iconClass} />
-              <input
-                id="book-name"
-                type="text"
-                autoComplete="name"
-                placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isAuthenticated}
-                className="field pl-11"
-              />
-            </div>
+            <input
+              id="book-name"
+              type="text"
+              autoComplete="name"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isAuthenticated}
+              className="field"
+            />
           </div>
 
           <div>
             <label htmlFor="book-phone" className="field-label">
               WhatsApp number
             </label>
-            <div className="group flex rounded-2xl border border-line bg-coal transition-[border-color,background-color,box-shadow] duration-200 focus-within:border-amber/70 focus-within:bg-black focus-within:shadow-[0_0_0_4px_rgb(255_193_7/0.1)] hover:border-edge">
-              <span className="flex items-center border-r border-line pr-3 pl-4 text-[15px] font-medium text-mute transition-colors group-focus-within:text-amber">
+            <div className="flex rounded-xl border border-line bg-coal transition-colors focus-within:border-amber/70 hover:border-edge">
+              <span className="flex items-center pl-4 text-[15px] text-mute">
                 +91
               </span>
               <input
@@ -425,7 +368,7 @@ function BookingForm() {
                 value={phone}
                 onChange={handlePhoneChange}
                 maxLength="10"
-                className="w-full min-w-0 bg-transparent px-3 py-3.5 text-[15px] text-white tabular-nums placeholder:text-dim"
+                className="w-full min-w-0 bg-transparent px-3 py-3 text-[15px] text-white tabular-nums placeholder:text-dim"
               />
             </div>
           </div>
@@ -435,132 +378,83 @@ function BookingForm() {
           <label htmlFor="book-email" className="field-label">
             Email
           </label>
-          <div className="group relative">
-            <Mail size={17} className={iconClass} />
-            <input
-              id="book-email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="field pl-11"
-            />
-          </div>
+          <input
+            id="book-email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="field"
+          />
         </div>
       </div>
 
-      <div className="perforation [--notch:#000]" />
-
-      {/* 3. Payment */}
-      <div className="px-5 pt-7 pb-6 sm:px-7">
-        <fieldset>
-          <legend className="contents">
-            <StepLabel n="3">How will you pay?</StepLabel>
-          </legend>
-          <div role="radiogroup" className="grid grid-cols-2 gap-3">
-            {paymentOptions.map((option) => {
-              const selected = paymentMethod === option.value;
-              const Icon = option.icon;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => setPaymentMethod(option.value)}
-                  className={`relative flex flex-col items-start gap-3 rounded-2xl border p-3.5 text-left transition-[border-color,background-color] duration-200 sm:p-4 ${
-                    selected
-                      ? "border-amber/70 bg-amber/[0.07]"
-                      : "border-line bg-coal hover:border-edge"
-                  }`}
-                >
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
-                      selected ? "bg-amber text-black" : "bg-white/5 text-mute"
-                    }`}
-                  >
-                    <Icon size={18} />
+      <div className="mt-6">
+        <p className="field-label">Payment</p>
+        <div role="radiogroup" className="grid grid-cols-2 gap-2">
+          {paymentOptions.map((option) => {
+            const selected = paymentMethod === option.value;
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setPaymentMethod(option.value)}
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition-colors ${
+                  selected
+                    ? "border-amber bg-amber/5"
+                    : "border-line hover:border-edge"
+                }`}
+              >
+                <Icon
+                  size={18}
+                  className={selected ? "text-amber" : "text-mute"}
+                />
+                <span>
+                  <span className="block text-sm font-medium text-white">
+                    {option.label}
                   </span>
-                  <span>
-                    <span
-                      className={`block text-sm font-semibold ${selected ? "text-white" : "text-fog"}`}
-                    >
-                      {option.label}
-                    </span>
-                    <span className="block text-xs text-mute">{option.sub}</span>
-                  </span>
-                  <span
-                    className={`absolute top-3.5 right-3.5 flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
-                      selected
-                        ? "border-amber bg-amber text-black"
-                        : "border-edge"
-                    }`}
-                  >
-                    {selected && <Check size={12} strokeWidth={3} />}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p
-            key={paymentMethod}
-            className="animate-fade mt-3 text-xs text-mute"
-          >
-            {paymentOptions.find((o) => o.value === paymentMethod).hint}
-          </p>
-        </fieldset>
+                  <span className="block text-xs text-mute">{option.sub}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Total */}
-      <div className="rounded-b-[1.75rem] border-t border-white/[0.06] bg-black/40 px-5 pt-5 pb-6 sm:px-7">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-fog">
-              Total fare
-            </p>
-            <p className="mt-0.5 text-xs text-dim tabular-nums">
-              {duration} {duration === 1 ? "hr" : "hrs"} &times;{" "}
-              {formatINR(HOURLY_RATE)}, no surge
-            </p>
-          </div>
-          <p
-            key={fare}
-            className="animate-rise text-3xl font-bold tracking-tight text-white tabular-nums"
-          >
-            {formatINR(fare)}
+      <div className="mt-6 flex items-end justify-between border-t border-white/[0.06] pt-5">
+        <div>
+          <p className="text-sm text-mute">Total fare</p>
+          <p className="text-xs text-dim tabular-nums">
+            {duration} &times; {formatINR(HOURLY_RATE)}, no surge
           </p>
         </div>
-
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn-primary group w-full py-4 text-base"
-        >
-          {isSubmitting ? (
-            <LoaderCircle size={18} className="animate-spin" />
-          ) : null}
-          {paymentMethod === "Online"
-            ? "Continue to payment"
-            : "Confirm booking"}
-          {!isSubmitting && (
-            <ArrowRight
-              size={18}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            />
-          )}
-        </button>
-
-        {!isAuthenticated && (
-          <p className="mt-4 text-center text-sm text-mute">
-            You&apos;ll need to{" "}
-            <Link to="/login" className="link">
-              log in
-            </Link>{" "}
-            before confirming.
-          </p>
-        )}
+        <p className="text-2xl font-bold text-white tabular-nums">
+          {formatINR(fare)}
+        </p>
       </div>
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="btn-primary mt-5 w-full py-3.5 text-base"
+      >
+        {isSubmitting && <LoaderCircle size={18} className="animate-spin" />}
+        {paymentMethod === "Online" ? "Continue to payment" : "Confirm booking"}
+      </button>
+
+      {!isAuthenticated && (
+        <p className="mt-4 text-center text-sm text-mute">
+          You&apos;ll need to{" "}
+          <Link to="/login" className="link">
+            log in
+          </Link>{" "}
+          before confirming.
+        </p>
+      )}
     </form>
   );
 }

@@ -5,7 +5,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import RequireRole from "./components/RequireRole";
 import Home from "./pages/Home";
 
-// Home ships in the main bundle; every other page loads when first visited
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const Services = lazy(() => import("./pages/Services"));

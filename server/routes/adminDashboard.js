@@ -3,27 +3,19 @@ const pool = require("../db");
 const authorize = require("../middleware/authorization");
 const twilio = require("twilio");
 const admin = require("../middleware/admin");
-const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-// Inititate Twilio
 const twilioSid = process.env.TWILIO_ACCOUNT_SID || process.env.TWILIO_SID;
 const client = twilio(twilioSid, process.env.TWILIO_AUTH_TOKEN);
 
-// Initiate email
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const realBooking =
+  "NOT (payment_method = 'Online' AND payment_status = 'unpaid')";
 
-// Get Dashboard Stats
 router.get("/stats", authorize, admin, async (req, res) => {
   try {
-    const bookingCount = await pool.query("SELECT COUNT(*) FROM bookings");
+    const bookingCount = await pool.query(
+      `SELECT COUNT(*) FROM bookings WHERE ${realBooking}`,
+    );
     const driverCount = await pool.query(
       "SELECT COUNT(*) FROM users WHERE role = 'driver'",
     );
@@ -31,8 +23,8 @@ router.get("/stats", authorize, admin, async (req, res) => {
       "SELECT COUNT(*) FROM driver_applications WHERE status = 'pending'",
     );
     const revenue = await pool.query(
-      "SELECT SUM(duration) * 200 as total FROM bookings",
-    ); // Matches the ₹200/hr fare charged in routes/booking.js
+      "SELECT SUM(amount) AS total FROM bookings WHERE status = 'completed'",
+    );
 
     res.json({
       totalBookings: bookingCount.rows[0].count,
@@ -42,25 +34,22 @@ router.get("/stats", authorize, admin, async (req, res) => {
     });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// Get All Bookings
 router.get("/bookings", authorize, admin, async (req, res) => {
   try {
-    // Get latest bookings first
     const result = await pool.query(
-      "SELECT * FROM bookings ORDER BY created_at DESC",
+      `SELECT * FROM bookings WHERE ${realBooking} ORDER BY created_at DESC`,
     );
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// DELETE a pending booking
 router.delete("/bookings/:id", authorize, admin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -68,11 +57,10 @@ router.delete("/bookings/:id", authorize, admin, async (req, res) => {
     res.json({ message: "Booking deleted successfully" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// Get All Driver Applications
 router.get("/applications", authorize, admin, async (req, res) => {
   try {
     const result = await pool.query(
@@ -81,107 +69,93 @@ router.get("/applications", authorize, admin, async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// Approve/Reject Driver
 router.put("/applications/:id", authorize, admin, async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    // 1. Update Application Status
-    const updateApp = await pool.query(
-      "UPDATE driver_applications SET status = $1 WHERE application_id = $2 RETURNING *",
-      [status, id],
+    if (status !== "approved" && status !== "rejected") {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const appQuery = await pool.query(
+      "SELECT * FROM driver_applications WHERE application_id = $1",
+      [id],
     );
 
-    const application = updateApp.rows[0];
+    const application = appQuery.rows[0];
 
-    // 2. If Approved, Upgrade/Create User
-    if (status === "approved" && application) {
-      const { email, full_name, phone, car_model, license_number } =
-        application;
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
 
-      let userId;
+    if (status === "approved") {
+      const { email, phone, car_model, license_number } = application;
 
       const userCheck = await pool.query(
         "SELECT user_id FROM users WHERE email = $1",
         [email],
       );
 
-      if (userCheck.rows.length > 0) {
-        userId = userCheck.rows[0].user_id;
-
-        await pool.query(
-          "UPDATE users SET role = 'driver', phone_number = $2 WHERE email = $1",
-          [email, phone],
-        );
-      } else {
-        // User does not exist, Create new account
-        const salt = await bcrypt.genSalt(10);
-        const bcryptPassword = await bcrypt.hash("driver123", salt);
-
-        const newUser = await pool.query(
-          "INSERT INTO users (full_name, email, password_hash, phone_number, role) VALUES ($1, $2, $3, $4, 'driver') RETURNING user_id",
-          [full_name, email, bcryptPassword, phone],
-        );
-
-        // Grab the new ID
-        userId = newUser.rows[0].user_id;
+      if (userCheck.rows.length === 0) {
+        return res
+          .status(404)
+          .json({ error: "No account found with this email" });
       }
 
+      const userId = userCheck.rows[0].user_id;
+
       await pool.query(
-        `INSERT INTO driver_profiles (user_id, car_model, license_number, is_available) 
+        "UPDATE users SET role = 'driver', phone_number = $2 WHERE user_id = $1",
+        [userId, phone],
+      );
+
+      await pool.query(
+        `INSERT INTO driver_profiles (user_id, car_model, license_number, is_available)
         VALUES ($1, $2, $3, true)
-        ON CONFLICT (user_id) DO UPDATE 
+        ON CONFLICT (user_id) DO UPDATE
         SET car_model = EXCLUDED.car_model, license_number = EXCLUDED.license_number`,
         [userId, car_model, license_number],
       );
     }
 
-    res.json({ message: "Driver approved and account updated", application });
+    await pool.query(
+      "UPDATE driver_applications SET status = $1 WHERE application_id = $2",
+      [status, id],
+    );
+
+    res.json({ message: `Application ${status}` });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// 1. Get all approved drivers (to show in a dropdown)
-router.get("/drivers", authorize, admin, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT user_id, full_name, phone_number FROM users WHERE role = 'driver'",
-    );
-    res.json(result.rows);
-  } catch (err) {
-    res.status(500).json("Server Error");
-  }
-});
-
-// GET All Registered Drivers with Car Details & Trip Count
 router.get("/drivers-list", authorize, admin, async (req, res) => {
   try {
     const drivers = await pool.query(
-      `SELECT 
-        u.user_id, 
-        u.full_name, 
-        u.email, 
-        u.phone_number, 
+      `SELECT
+        u.user_id,
+        u.full_name,
+        u.email,
+        u.phone_number,
         u.created_at,
-        dp.car_model, 
+        dp.car_model,
         dp.license_number,
         dp.is_available,
-        COALESCE(COUNT(b.booking_id), 0) AS total_trips
+        COUNT(b.booking_id) AS total_trips
       FROM users u
       LEFT JOIN driver_profiles dp ON u.user_id = dp.user_id
       LEFT JOIN bookings b ON u.user_id = b.driver_id AND b.status = 'completed'
       WHERE u.role = 'driver'
-      GROUP BY 
-        u.user_id, 
-        dp.car_model, 
-        dp.license_number, 
+      GROUP BY
+        u.user_id,
+        dp.car_model,
+        dp.license_number,
         dp.is_available
       ORDER BY total_trips DESC`,
     );
@@ -189,31 +163,40 @@ router.get("/drivers-list", authorize, admin, async (req, res) => {
     res.json(drivers.rows);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 
-// Assign Driver & Send SMS
 router.put("/assign-driver", authorize, admin, async (req, res) => {
   try {
     const { booking_id, driver_id } = req.body;
 
+    const driverQuery = await pool.query(
+      `SELECT u.full_name, u.phone_number, dp.car_model, dp.license_number
+       FROM users u LEFT JOIN driver_profiles dp ON u.user_id = dp.user_id
+       WHERE u.user_id = $1 AND u.role = 'driver'`,
+      [driver_id],
+    );
+    const driver = driverQuery.rows[0];
+
+    if (!driver) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
     const endRidePin = Math.floor(1000 + Math.random() * 9000).toString();
 
     const updatedBooking = await pool.query(
-      "UPDATE bookings SET status = 'confirmed', driver_id = $1, end_ride_pin = $2 WHERE booking_id = $3 RETURNING *",
+      "UPDATE bookings SET status = 'confirmed', driver_id = $1, end_ride_pin = $2 WHERE booking_id = $3 AND status = 'pending' RETURNING *",
       [driver_id, endRidePin, booking_id],
     );
 
     const booking = updatedBooking.rows[0];
 
-    const driverQuery = await pool.query(
-      `SELECT u.full_name, u.phone_number, dp.car_model, dp.license_number 
-       FROM users u JOIN driver_profiles dp ON u.user_id = dp.user_id 
-       WHERE u.user_id = $1`,
-      [driver_id],
-    );
-    const driver = driverQuery.rows[0];
+    if (!booking) {
+      return res
+        .status(404)
+        .json({ error: "Booking not found or already assigned" });
+    }
 
     const messageBody = `
 ✅ *Driver Assigned!*
@@ -237,21 +220,10 @@ router.put("/assign-driver", authorize, admin, async (req, res) => {
       console.error("Twilio WhatsApp Error:", twilioErr.message);
     }
 
-    try {
-      await transporter.sendMail({
-        from: `"SafarSaathi Admin" <${process.env.EMAIL_USER}>`,
-        to: booking.email,
-        subject: "Your SafarSaathi Ride is Confirmed! 🚖",
-        text: messageBody,
-      });
-    } catch (emailErr) {
-      console.error("Nodemailer Email Error:", emailErr.message);
-    }
-
     res.json({ message: "Driver assigned and user notified!" });
   } catch (err) {
     console.error("Assignment Error:", err.message);
-    res.status(500).json("Server Error");
+    res.status(500).json({ error: "Server Error" });
   }
 });
 

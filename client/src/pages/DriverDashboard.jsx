@@ -45,73 +45,52 @@ function PaymentNote({ booking }) {
 
 function ActiveRide({ booking, onComplete, onCancel }) {
   return (
-    <article className="animate-rise relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-panel">
-      <div className="checker h-2 [--sq:4px]" />
-
-      <div className="flex items-start justify-between gap-4 px-5 pt-5 sm:px-7 sm:pt-6">
+    <article className="surface p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs text-mute tabular-nums">
             Booking #{booking.booking_id}
             {booking.created_at && <>, {formatDate(booking.created_at)}</>}
           </p>
-          <h3 className="mt-1 truncate text-2xl font-bold tracking-tight text-white">
+          <h3 className="mt-1 truncate text-xl font-semibold text-white">
             {booking.user_name}
           </h3>
         </div>
-        <div className="shrink-0 rounded-2xl bg-amber px-3.5 py-2 text-center text-black">
-          <p className="text-2xl leading-none font-extrabold tabular-nums">
-            {booking.duration}
-          </p>
-          <p className="mt-0.5 text-[10px] font-semibold">
-            {Number(booking.duration) === 1 ? "hour" : "hours"}
-          </p>
-        </div>
+        <span className="shrink-0 rounded-full bg-amber/10 px-3 py-1 text-sm font-medium text-amber tabular-nums">
+          {hoursLabel(booking.duration)}
+        </span>
       </div>
 
-      <div className="px-5 py-5 sm:px-7">
-        <div className="flex gap-3 rounded-2xl border border-white/[0.06] bg-black/40 p-4">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
-            <MapPin size={18} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-xs text-mute">Pickup</p>
-            <p className="mt-0.5 leading-relaxed text-fog">
-              {booking.pickup_location}
-            </p>
-          </div>
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <PaymentNote booking={booking} />
-        </div>
-
-        <div className="mt-5 grid grid-cols-2 gap-2.5">
-          <a
-            href={`tel:+${booking.phone}`}
-            className="btn-secondary py-3.5"
-          >
-            <Phone size={17} />
-            Call
-          </a>
-          <a
-            href={mapsUrl(booking)}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-secondary py-3.5"
-          >
-            <Navigation size={17} />
-            Navigate
-          </a>
-        </div>
+      <div className="mt-5 flex gap-3">
+        <MapPin size={18} className="mt-0.5 shrink-0 text-amber" />
+        <p className="leading-relaxed text-fog">{booking.pickup_location}</p>
+      </div>
+      <div className="mt-4">
+        <PaymentNote booking={booking} />
       </div>
 
-      <div className="perforation [--notch:#000]" />
+      <div className="mt-5 grid grid-cols-2 gap-2">
+        <a href={`tel:+${booking.phone}`} className="btn-secondary">
+          <Phone size={16} />
+          Call
+        </a>
+        <a
+          href={mapsUrl(booking)}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-secondary"
+        >
+          <Navigation size={16} />
+          Navigate
+        </a>
+      </div>
 
-      <div className="flex flex-col-reverse gap-2.5 px-5 py-5 sm:flex-row sm:justify-end sm:px-7">
-        <button onClick={onCancel} className="btn-danger py-3.5">
+      <div className="mt-5 flex flex-col-reverse gap-2 border-t border-white/[0.06] pt-5 sm:flex-row sm:justify-end">
+        <button onClick={onCancel} className="btn-danger">
           Cancel ride
         </button>
-        <button onClick={onComplete} className="btn-primary py-3.5 sm:px-8">
-          <KeyRound size={17} />
+        <button onClick={onComplete} className="btn-primary">
+          <KeyRound size={16} />
           Complete with PIN
         </button>
       </div>
@@ -127,9 +106,7 @@ function PastRides({ rides }) {
           key={ride.booking_id}
           className="flex items-center gap-4 px-4 py-4 sm:px-6"
         >
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ok/10 text-ok">
-            <CircleCheck size={18} />
-          </span>
+          <CircleCheck size={18} className="shrink-0 text-ok" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium text-white">{ride.user_name}</p>
             <p className="truncate text-sm text-mute">
@@ -146,53 +123,6 @@ function PastRides({ rides }) {
         </li>
       ))}
     </ul>
-  );
-}
-
-// Four boxes over one real input, so paste and autofill still work.
-function PinInput({ value, onChange }) {
-  return (
-    <div className="relative mx-auto w-fit">
-      <div className="flex gap-3" aria-hidden="true">
-        {[0, 1, 2, 3].map((i) => {
-          const filled = value[i] !== undefined;
-          const current = i === value.length;
-          return (
-            <span
-              key={i}
-              className={`flex h-16 w-14 items-center justify-center rounded-2xl border text-3xl font-bold tabular-nums transition-colors duration-150 sm:h-[4.5rem] sm:w-16 ${
-                filled
-                  ? "border-amber bg-amber/10 text-amber"
-                  : current
-                    ? "border-white/40 bg-black text-white"
-                    : "border-white/10 bg-black text-dim"
-              }`}
-            >
-              {value[i] ??
-                (current ? (
-                  <span className="animate-blink h-7 w-0.5 bg-white/70" />
-                ) : (
-                  ""
-                ))}
-            </span>
-          );
-        })}
-      </div>
-      <label htmlFor="ride-pin" className="sr-only">
-        Customer PIN
-      </label>
-      <input
-        id="ride-pin"
-        type="text"
-        inputMode="numeric"
-        autoComplete="one-time-code"
-        autoFocus
-        maxLength="4"
-        value={value}
-        onChange={onChange}
-        className="absolute inset-0 h-full w-full cursor-text opacity-0"
-      />
-    </div>
   );
 }
 
@@ -301,13 +231,13 @@ const DriverDashboard = () => {
       onLogout={handleLogout}
     >
       {activeTab === "active" ? (
-        <div key="active" className="animate-rise">
+        <div>
           <PageHeader
             title={firstName ? `Hi ${firstName}, ready to roll?` : "Your rides"}
             description="Rides assigned to you by the SafarSaathi team."
           />
 
-          <div className="mb-10">
+          <div className="mb-8">
             <StatStrip
               stats={[
                 {
@@ -326,7 +256,7 @@ const DriverDashboard = () => {
             />
           </div>
 
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid gap-4 xl:grid-cols-2">
             {activeRides.map((booking) => (
               <ActiveRide
                 key={booking.booking_id}
@@ -345,7 +275,7 @@ const DriverDashboard = () => {
           )}
         </div>
       ) : (
-        <div key="history" className="animate-rise">
+        <div>
           <PageHeader
             title="Ride history"
             description={`${completedCount} completed ${
@@ -371,24 +301,35 @@ const DriverDashboard = () => {
         description="Ask the customer for the 4-digit PIN they received on WhatsApp."
       >
         <form onSubmit={submitCompleteRide}>
-          <PinInput
+          <label htmlFor="ride-pin" className="sr-only">
+            Customer PIN
+          </label>
+          <input
+            id="ride-pin"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            autoFocus
+            maxLength="4"
+            placeholder="••••"
             value={enteredPin}
             onChange={(e) =>
               setEnteredPin(e.target.value.replace(/\D/g, "").slice(0, 4))
             }
+            className="field py-4 text-center text-3xl font-semibold tracking-[0.6em] tabular-nums"
           />
-          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={closePinModal}
-              className="btn-secondary py-3.5"
+              className="btn-secondary"
             >
               Not yet
             </button>
             <button
               type="submit"
               disabled={enteredPin.length !== 4 || isVerifying}
-              className="btn-primary py-3.5"
+              className="btn-primary"
             >
               {isVerifying && (
                 <LoaderCircle size={17} className="animate-spin" />

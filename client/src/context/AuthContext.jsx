@@ -3,7 +3,6 @@ import axios from "../api/axios";
 import toast from "react-hot-toast";
 import { AuthContext } from "./authContext";
 
-// Restore the session saved by a previous login, if any.
 const readStoredUser = () => {
   try {
     const token = localStorage.getItem("token");
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }) => {
     setUser(data.user);
   };
 
-  // Resolves to the logged in user, or null on failure
   const login = async (email, password) => {
     try {
       const response = await axios.post("/auth/login", { email, password });
@@ -41,13 +39,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, role) => {
+  const register = async (name, email, password) => {
     try {
       const response = await axios.post("/auth/register", {
         name,
         email,
         password,
-        role: role || "customer",
       });
       if (!response.data.token) throw new Error("No token returned");
       saveSession(response.data);
@@ -69,7 +66,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, loading: false, login, register, logout }}
+      value={{ isAuthenticated, user, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>

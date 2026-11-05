@@ -48,13 +48,10 @@ function TextButton({ onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className="group inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-3.5 py-1.5 text-sm font-medium text-amber transition-colors hover:bg-amber hover:text-black"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-amber hover:text-amber-soft"
     >
       {children}
-      <ArrowRight
-        size={14}
-        className="transition-transform duration-200 group-hover:translate-x-0.5"
-      />
+      <ArrowRight size={14} />
     </button>
   );
 }
@@ -62,7 +59,7 @@ function TextButton({ onClick, children }) {
 function Tabs({ tabs, value, onChange }) {
   return (
     <div
-      className="no-scrollbar mb-6 flex w-full gap-1 overflow-x-auto rounded-full border border-white/[0.07] bg-coal p-1 sm:w-fit"
+      className="mb-6 flex w-full gap-1 overflow-x-auto rounded-lg border border-white/[0.07] bg-coal p-1 sm:w-fit"
       role="tablist"
     >
       {tabs.map((tab) => (
@@ -71,16 +68,16 @@ function Tabs({ tabs, value, onChange }) {
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`flex flex-1 shrink-0 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 sm:flex-none ${
+          className={`flex flex-1 shrink-0 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
             value === tab.value
-              ? "bg-amber text-black"
+              ? "bg-white/[0.08] text-white"
               : "text-mute hover:text-white"
           }`}
         >
           {tab.label}
           <span
             className={`rounded-full px-1.5 text-xs tabular-nums ${
-              value === tab.value ? "bg-black/15" : "bg-white/[0.06]"
+              value === tab.value ? "text-amber" : "text-dim"
             }`}
           >
             {tab.count}
@@ -114,25 +111,24 @@ const AdminDashboard = () => {
   });
   const [bookings, setBookings] = useState([]);
   const [applications, setApplications] = useState([]);
-  const [drivers, setDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState({});
   const [bookingView, setBookingView] = useState("pending");
   const [driverList, setDriverList] = useState([]);
   const [deleteBookingId, setDeleteBookingId] = useState(null);
 
-  // Ref to track completed rides for notifications
   const prevCompletedCount = useRef(0);
 
   const fetchData = useCallback(
     async (isBackgroundPoll = false) => {
       try {
-        const statsRes = await axios.get("/api/admin/stats");
-        setStats(statsRes.data);
+        const [statsRes, bookingsRes, appsRes, driversRes] = await Promise.all([
+          axios.get("/api/admin/stats"),
+          axios.get("/api/admin/bookings"),
+          axios.get("/api/admin/applications"),
+          axios.get("/api/admin/drivers-list"),
+        ]);
 
-        const bookingsRes = await axios.get("/api/admin/bookings");
         const fetchedBookings = bookingsRes.data;
-
-        // Notify when a driver completes a ride between polls
         const currentCompletedCount = fetchedBookings.filter(
           (b) => b.status === "completed",
         ).length;
@@ -144,16 +140,10 @@ const AdminDashboard = () => {
         }
         prevCompletedCount.current = currentCompletedCount;
 
+        setStats(statsRes.data);
         setBookings(fetchedBookings);
-
-        const appsRes = await axios.get("/api/admin/applications");
         setApplications(appsRes.data);
-
-        const driversRes = await axios.get("/api/admin/drivers");
-        setDrivers(driversRes.data);
-
-        const driversListRes = await axios.get("/api/admin/drivers-list");
-        setDriverList(driversListRes.data);
+        setDriverList(driversRes.data);
       } catch (err) {
         if (err.response?.status === 403) navigate("/");
       }
@@ -179,8 +169,8 @@ const AdminDashboard = () => {
       await axios.put(`/api/admin/applications/${id}`, { status: "approved" });
       toast.success("Driver approved");
       fetchData();
-    } catch {
-      toast.error("Update failed");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Update failed");
     }
   };
 
@@ -205,8 +195,8 @@ const AdminDashboard = () => {
       });
       toast.success("Driver assigned");
       fetchData();
-    } catch {
-      toast.error("Assignment failed");
+    } catch (err) {
+      toast.error(err.response?.data?.error || "Assignment failed");
     }
   };
 
@@ -265,9 +255,8 @@ const AdminDashboard = () => {
       user={user}
       onLogout={handleLogout}
     >
-      {/* OVERVIEW */}
       {activeTab === "overview" && (
-        <div className="animate-rise">
+        <div>
           <PageHeader
             title="Overview"
             description="Refreshes automatically every 20 seconds."
@@ -316,11 +305,9 @@ const AdminDashboard = () => {
                   {pendingBookings.slice(0, 5).map((b) => (
                     <li
                       key={b.booking_id}
-                      className="flex items-center gap-4 px-4 py-4 transition-colors duration-200 hover:bg-white/[0.02] sm:px-5"
+                      className="flex items-center gap-4 px-4 py-4 sm:px-5"
                     >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber/10 text-amber">
-                        <MapPin size={18} />
-                      </span>
+                      <MapPin size={18} className="shrink-0 text-amber" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium text-white">
                           {b.user_name}
@@ -367,7 +354,7 @@ const AdminDashboard = () => {
                       key={app.application_id}
                       className="flex items-center gap-4 px-4 py-4 sm:px-5"
                     >
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.05] text-sm font-bold text-white">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/[0.06] text-sm font-semibold text-white">
                         {(app.full_name || "?").charAt(0).toUpperCase()}
                       </span>
                       <div className="min-w-0">
@@ -428,9 +415,8 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* BOOKINGS */}
       {activeTab === "bookings" && (
-        <div className="animate-rise">
+        <div>
           <PageHeader
             title="Bookings"
             description="Pick a driver for each new request."
@@ -459,7 +445,7 @@ const AdminDashboard = () => {
                 return (
                   <li
                     key={b.booking_id}
-                    className="surface grid gap-4 p-4 transition-colors duration-200 hover:border-white/15 sm:p-5 lg:grid-cols-[1.1fr_1.6fr_auto] lg:items-center lg:gap-8 lg:px-6"
+                    className="surface grid gap-4 p-4 sm:p-5 lg:grid-cols-[1.1fr_1.6fr_auto] lg:items-center lg:gap-8 lg:px-6"
                   >
                     <div className="flex items-start justify-between gap-3 lg:block">
                       <div className="min-w-0">
@@ -499,7 +485,7 @@ const AdminDashboard = () => {
                       <div className="flex gap-2 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
                         <select
                           aria-label={`Driver for booking ${b.booking_id}`}
-                          className="field min-w-0 flex-1 rounded-full py-2.5 text-sm lg:w-44 lg:flex-none"
+                          className="field min-w-0 flex-1 py-2 text-sm lg:w-44 lg:flex-none"
                           value={selectedDriver[b.booking_id] || ""}
                           onChange={(e) =>
                             setSelectedDriver({
@@ -509,7 +495,7 @@ const AdminDashboard = () => {
                           }
                         >
                           <option value="">Choose driver</option>
-                          {drivers.map((d) => (
+                          {driverList.map((d) => (
                             <option key={d.user_id} value={d.user_id}>
                               {d.full_name}
                             </option>
@@ -517,13 +503,13 @@ const AdminDashboard = () => {
                         </select>
                         <button
                           onClick={() => handleAssign(b.booking_id)}
-                          className="btn-primary px-5 py-2.5"
+                          className="btn-primary px-5 py-2"
                         >
                           Assign
                         </button>
                         <button
                           onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger px-3 py-2.5"
+                          className="btn-danger px-3 py-2"
                           aria-label={`Delete booking ${b.booking_id}`}
                           title="Delete booking"
                         >
@@ -552,9 +538,8 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* APPLICATIONS */}
       {activeTab === "applications" && (
-        <div className="animate-rise">
+        <div>
           <PageHeader
             title="Driver applications"
             description="Approving an application upgrades that person's account to a driver account."
@@ -567,7 +552,7 @@ const AdminDashboard = () => {
                   className="surface flex flex-col p-5 sm:p-6"
                 >
                   <div className="flex items-center gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber text-lg font-bold text-black">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.06] font-semibold text-white">
                       {(app.full_name || "?").charAt(0).toUpperCase()}
                     </span>
                     <div className="min-w-0">
@@ -593,9 +578,9 @@ const AdminDashboard = () => {
                       return (
                         <div
                           key={row.label}
-                          className="flex items-center gap-3 rounded-2xl bg-black/40 px-3.5 py-2.5"
+                          className="flex items-center gap-3 py-1"
                         >
-                          <Icon size={15} className="shrink-0 text-amber" />
+                          <Icon size={15} className="shrink-0 text-dim" />
                           <dt className="w-16 shrink-0 text-mute">
                             {row.label}
                           </dt>
@@ -614,14 +599,14 @@ const AdminDashboard = () => {
                   <div className="mt-5 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => handleReject(app.application_id)}
-                      className="btn-danger py-3"
+                      className="btn-danger"
                     >
                       <X size={16} />
                       Reject
                     </button>
                     <button
                       onClick={() => handleApprove(app.application_id)}
-                      className="btn-primary py-3"
+                      className="btn-primary"
                     >
                       <Check size={16} />
                       Approve
@@ -640,28 +625,23 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* DRIVERS */}
       {activeTab === "drivers" && (
-        <div className="animate-rise">
+        <div>
           <PageHeader
             title="Drivers"
             description="Everyone approved to take rides, sorted by completed trips."
           />
           {driverList.length > 0 ? (
             <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {driverList.map((driver, index) => (
+              {driverList.map((driver) => (
                 <li
                   key={driver.user_id}
-                  className="surface relative flex flex-col overflow-hidden p-5 sm:p-6"
+                  className="surface flex flex-col p-5 sm:p-6"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
                       <span
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base font-bold ${
-                          index === 0 && Number(driver.total_trips) > 0
-                            ? "bg-amber text-black"
-                            : "bg-white/[0.06] text-white"
-                        }`}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/[0.06] font-semibold text-white"
                       >
                         {(driver.full_name || "?").charAt(0).toUpperCase()}
                       </span>
@@ -675,7 +655,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-2xl font-bold text-white tabular-nums">
+                      <p className="text-2xl font-semibold text-white tabular-nums">
                         {driver.total_trips || 0}
                       </p>
                       <p className="text-[11px] text-mute">trips</p>

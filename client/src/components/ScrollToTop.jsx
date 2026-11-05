@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-// Start each new page at the top, or at the #section the link points to.
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
 
