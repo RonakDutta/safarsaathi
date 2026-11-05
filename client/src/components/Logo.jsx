@@ -5,7 +5,7 @@ function Logo({ suffix, className = "", onClick }) {
     <Link
       to="/"
       onClick={onClick}
-      className={`group inline-flex items-center gap-2 text-xl font-bold tracking-tight text-white ${className}`}
+      className={`group inline-flex items-center gap-2 text-xl font-bold tracking-normal text-white ${className}`}
     >
       <span className="leading-none">
         Safar<span className="text-amber">Saathi</span>

@@ -32,6 +32,8 @@ body {
   min-width: 320px;
   background-color: var(--color-ink);
   overflow-x: clip;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
 
 ::selection {
@@ -66,15 +68,15 @@ input[type="range"] {
 }
 
 @utility field {
-  @apply w-full rounded-xl border border-line bg-coal px-4 py-3 text-[15px] text-white transition-colors duration-200 placeholder:text-dim hover:border-edge focus:border-amber/70 disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-line;
+  @apply w-full rounded-xl border border-line bg-coal px-4 py-3 text-sm text-white transition-colors duration-200 placeholder:text-dim hover:border-edge focus:border-amber/70 disabled:cursor-not-allowed disabled:text-mute disabled:hover:border-line;
 }
 
 @utility field-label {
-  @apply mb-2 block text-sm font-medium text-fog;
+  @apply mb-2 block text-sm font-medium tracking-normal text-fog;
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-normal transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50;
 }
 
 @utility btn-primary {
@@ -102,7 +104,7 @@ input[type="range"] {
 }
 
 @utility display {
-  @apply font-bold tracking-tight text-white;
+  @apply font-bold tracking-normal text-white;
 }
 
 .pb-safe {

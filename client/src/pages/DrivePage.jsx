@@ -194,7 +194,7 @@ function DrivePage() {
             Phone number
           </label>
           <div className="flex rounded-xl border border-line bg-coal transition-colors focus-within:border-amber/70 hover:border-edge">
-            <span className="flex items-center pl-4 text-[15px] text-mute">
+            <span className="flex items-center pl-4 text-sm text-mute">
               +91
             </span>
             <input
@@ -211,7 +211,7 @@ function DrivePage() {
                   phone: e.target.value.replace(/\D/g, "").slice(0, 10),
                 })
               }
-              className="w-full min-w-0 bg-transparent px-3 py-3 text-[15px] text-white tabular-nums placeholder:text-dim"
+              className="w-full min-w-0 bg-transparent px-3 py-3 text-sm text-white tabular-nums placeholder:text-dim"
               required
             />
           </div>

@@ -49,7 +49,13 @@ function ActiveRide({ booking, onComplete, onCancel }) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs text-mute tabular-nums">
-            Booking #{booking.booking_id}
+            Booking{" "}
+            <span
+              className="font-mono text-dim"
+              title={booking.booking_id}
+            >
+              #{booking.booking_id.slice(0, 8)}
+            </span>
             {booking.created_at && <>, {formatDate(booking.created_at)}</>}
           </p>
           <h3 className="mt-1 truncate text-xl font-semibold text-white">

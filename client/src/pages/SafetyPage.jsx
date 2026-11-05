@@ -133,7 +133,7 @@ function SafetyPage() {
                 <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber text-black">
                   <Icon size={22} />
                 </span>
-                <h2 className="mt-7 text-2xl font-bold tracking-tight text-white">
+                <h2 className="mt-7 text-2xl font-bold tracking-normal text-white">
                   {detail.title}
                 </h2>
                 <p className="mt-3 leading-relaxed text-mute">{detail.body}</p>

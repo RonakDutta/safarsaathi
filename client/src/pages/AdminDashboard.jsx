@@ -59,7 +59,7 @@ function TextButton({ onClick, children }) {
 function Tabs({ tabs, value, onChange }) {
   return (
     <div
-      className="mb-6 flex w-full gap-1 overflow-x-auto rounded-lg border border-white/[0.07] bg-coal p-1 sm:w-fit"
+      className="mb-6 flex w-full gap-1.5 overflow-x-auto rounded-xl border border-white/[0.07] bg-coal p-1.5 sm:w-fit"
       role="tablist"
     >
       {tabs.map((tab) => (
@@ -68,16 +68,16 @@ function Tabs({ tabs, value, onChange }) {
           role="tab"
           aria-selected={value === tab.value}
           onClick={() => onChange(tab.value)}
-          className={`flex flex-1 shrink-0 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
+          className={`flex flex-1 shrink-0 items-center justify-center gap-2.5 rounded-lg px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors sm:flex-none ${
             value === tab.value
-              ? "bg-white/[0.08] text-white"
+              ? "bg-white/[0.08] text-white font-semibold"
               : "text-mute hover:text-white"
           }`}
         >
           {tab.label}
           <span
-            className={`rounded-full px-1.5 text-xs tabular-nums ${
-              value === tab.value ? "text-amber" : "text-dim"
+            className={`rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums ${
+              value === tab.value ? "bg-amber/15 text-amber" : "bg-white/[0.05] text-dim"
             }`}
           >
             {tab.count}
@@ -91,9 +91,9 @@ function Tabs({ tabs, value, onChange }) {
 function Meta({ icon, children }) {
   const Icon = icon;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.05] px-2.5 py-1 text-xs text-fog">
-      <Icon size={13} className="text-mute" />
-      {children}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-3 py-1 text-xs font-medium text-fog/90">
+      <Icon size={13} className="shrink-0 text-mute" />
+      <span>{children}</span>
     </span>
   );
 }
@@ -449,18 +449,21 @@ const AdminDashboard = () => {
                   >
                     <div className="flex items-start justify-between gap-3 lg:block">
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-white">
+                        <p className="truncate text-base font-semibold text-white">
                           {b.user_name}
                         </p>
                         <a
                           href={`tel:+${b.phone}`}
-                          className="text-sm text-mute tabular-nums hover:text-amber"
+                          className="mt-0.5 block text-sm text-mute tabular-nums hover:text-amber"
                         >
                           +{b.phone}
                         </a>
                       </div>
-                      <span className="shrink-0 text-xs text-dim tabular-nums lg:mt-1 lg:block">
-                        #{b.booking_id}
+                      <span
+                        className="mt-1.5 inline-block shrink-0 font-mono text-[11px] text-dim tabular-nums"
+                        title={b.booking_id}
+                      >
+                        #{b.booking_id.slice(0, 8)}
                       </span>
                     </div>
 
@@ -468,11 +471,11 @@ const AdminDashboard = () => {
                       <p className="flex gap-2 text-sm leading-relaxed text-fog lg:line-clamp-2">
                         <MapPin
                           size={15}
-                          className="mt-0.5 shrink-0 text-amber"
+                          className="mt-1 shrink-0 text-amber"
                         />
-                        {b.pickup_location}
+                        <span>{b.pickup_location}</span>
                       </p>
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
                         <Meta icon={Clock}>{hoursLabel(b.duration)}</Meta>
                         <Meta icon={IndianRupee}>{b.payment_method}</Meta>
                         {b.created_at && (
@@ -482,10 +485,10 @@ const AdminDashboard = () => {
                     </div>
 
                     {b.status === "pending" ? (
-                      <div className="flex gap-2 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
+                      <div className="flex items-center gap-2.5 border-t border-white/[0.06] pt-4 lg:border-0 lg:pt-0">
                         <select
                           aria-label={`Driver for booking ${b.booking_id}`}
-                          className="field min-w-0 flex-1 py-2 text-sm lg:w-44 lg:flex-none"
+                          className="field min-w-0 flex-1 py-2.5 text-sm lg:w-48 lg:flex-none"
                           value={selectedDriver[b.booking_id] || ""}
                           onChange={(e) =>
                             setSelectedDriver({
@@ -503,13 +506,13 @@ const AdminDashboard = () => {
                         </select>
                         <button
                           onClick={() => handleAssign(b.booking_id)}
-                          className="btn-primary px-5 py-2"
+                          className="btn-primary shrink-0 px-5 py-2.5 text-sm font-semibold"
                         >
                           Assign
                         </button>
                         <button
                           onClick={() => setDeleteBookingId(b.booking_id)}
-                          className="btn-danger px-3 py-2"
+                          className="btn-danger shrink-0 flex h-10 w-10 items-center justify-center rounded-full p-0"
                           aria-label={`Delete booking ${b.booking_id}`}
                           title="Delete booking"
                         >
@@ -517,9 +520,17 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                     ) : (
-                      <p className="lg:text-right">
+                      <div className="flex items-center justify-between border-t border-white/[0.06] pt-3 lg:border-0 lg:pt-0 lg:justify-end gap-3">
                         <span className={status.className}>{status.label}</span>
-                      </p>
+                        <button
+                          onClick={() => setDeleteBookingId(b.booking_id)}
+                          className="btn-danger shrink-0 flex h-9 w-9 items-center justify-center rounded-full p-0"
+                          aria-label={`Delete booking ${b.booking_id}`}
+                          title="Delete booking"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     )}
                   </li>
                 );

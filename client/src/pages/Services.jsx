@@ -125,7 +125,7 @@ function Services() {
                 </div>
 
                 <h3
-                  className={`mt-7 text-2xl font-bold tracking-tight ${type.popular ? "" : "text-white"}`}
+                  className={`mt-7 text-2xl font-bold tracking-normal ${type.popular ? "" : "text-white"}`}
                 >
                   {type.name}
                 </h3>

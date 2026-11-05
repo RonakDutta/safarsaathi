@@ -93,13 +93,13 @@ function Home() {
 
         <div className="container-page grid gap-12 pt-28 pb-20 sm:pt-36 lg:min-h-[52rem] lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-16 lg:pb-24">
           <div>
-            <h1 className="display text-5xl leading-[1.05] sm:text-7xl">
+            <h1 className="display text-4xl leading-tight sm:text-6xl lg:text-7xl lg:leading-[1.1]">
               Hire a driver
               <br />
               <span className="text-amber">by the hour.</span>
             </h1>
 
-            <p className="mt-6 max-w-lg text-lg leading-relaxed text-fog/80">
+            <p className="mt-6 max-w-lg text-base sm:text-lg leading-relaxed text-fog/80">
               A verified professional driver for errands, office days, weddings
               or a safe ride home after a late night. One flat fare, from 1 to
               24 hours.
@@ -123,11 +123,11 @@ function Home() {
               ))}
             </ul>
 
-            <dl className="mt-10 flex max-w-md gap-10 border-t border-white/10 pt-6">
+            <dl className="mt-10 flex max-w-md gap-6 sm:gap-10 border-t border-white/10 pt-6">
               {heroStats.map((stat) => (
                 <div key={stat.label}>
                   <dt className="sr-only">{stat.label}</dt>
-                  <dd className="text-2xl font-semibold text-white tabular-nums">
+                  <dd className="text-xl sm:text-2xl font-semibold text-white tabular-nums">
                     {stat.value}
                   </dd>
                   <dd className="mt-1 text-xs text-mute">{stat.label}</dd>
@@ -140,7 +140,7 @@ function Home() {
         </div>
       </section>
 
-      <section id="how" className="scroll-mt-16 bg-coal py-24">
+      <section id="how" className="scroll-mt-16 bg-coal py-20 sm:py-24">
         <div className="container-page">
           <SectionHeading
             title={
@@ -152,13 +152,43 @@ function Home() {
             className="mb-14"
           />
           <ol className="relative grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-            <span className="absolute top-6 right-[12%] left-[12%] hidden border-t border-dashed border-amber/30 lg:block" />
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
                 <li key={step.title} className="relative">
+                  {/* Desktop horizontal dashed line between 1-2, 2-3, 3-4 (never past 4) */}
+                  {index < steps.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-6 left-12 -right-8 hidden border-t-2 border-dashed border-amber/30 lg:block"
+                    />
+                  )}
+
+                  {/* Tablet 2x2 horizontal connectors */}
+                  {(index === 0 || index === 2) && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-6 left-12 -right-8 hidden border-t-2 border-dashed border-amber/30 sm:block lg:hidden"
+                    />
+                  )}
+                  {/* Tablet 2x2 vertical connector from 1 to 3 */}
+                  {index === 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-12 left-6 -bottom-10 w-0 -translate-x-1/2 border-l-2 border-dashed border-amber/30 hidden sm:block lg:hidden"
+                    />
+                  )}
+
+                  {/* Mobile vertical dashed line between 1-2, 2-3, 3-4 */}
+                  {index < steps.length - 1 && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute top-12 left-6 -bottom-10 w-0 -translate-x-1/2 border-l-2 border-dashed border-amber/30 sm:hidden"
+                    />
+                  )}
+
                   <span
-                    className={`relative flex h-12 w-12 items-center justify-center rounded-full border ${
+                    className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border ${
                       index === steps.length - 1
                         ? "border-amber bg-amber text-black"
                         : "border-amber/40 bg-coal text-amber"
@@ -166,10 +196,10 @@ function Home() {
                   >
                     <Icon size={20} />
                   </span>
-                  <p className="mt-6 text-xs font-semibold text-dim tabular-nums">
+                  <p className="mt-6 text-xs font-semibold tracking-wider text-dim tabular-nums">
                     STEP 0{index + 1}
                   </p>
-                  <h3 className="mt-1 text-lg font-semibold text-white">
+                  <h3 className="mt-1.5 text-lg font-semibold text-white">
                     {step.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-mute">
@@ -182,7 +212,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="py-24">
+      <section className="py-20 sm:py-24">
         <div className="container-page">
           <SectionHeading
             title={
@@ -202,11 +232,11 @@ function Home() {
                 className="absolute inset-0 -z-20 h-full w-full object-cover"
               />
               <div className="absolute inset-0 -z-10 bg-linear-to-t from-black via-black/70 to-black/10" />
-              <p className="text-6xl font-bold tracking-tight text-amber tabular-nums">
+              <p className="text-5xl sm:text-6xl font-bold tracking-normal text-amber tabular-nums">
                 {formatINR(HOURLY_RATE)}
                 <span className="text-2xl font-medium text-white/70"> / hour</span>
               </p>
-              <p className="mt-3 max-w-sm text-fog/85">
+              <p className="mt-3 max-w-sm text-fog/85 leading-relaxed">
                 That is the whole price list. No per kilometre charges, no night
                 rates, no surge. Ever.
               </p>
@@ -232,7 +262,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="bg-coal py-24">
+      <section className="bg-coal py-20 sm:py-24">
         <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
           <SectionHeading
             title="Simple maths, worked out before you book."

@@ -22,7 +22,7 @@ function AuthLayout({ title, description, children, footer }) {
         <Logo className="text-2xl" />
 
         <div>
-          <p className="max-w-md text-4xl leading-tight font-bold tracking-tight text-white">
+          <p className="max-w-md text-4xl leading-tight font-bold tracking-normal text-white">
             Your trusted <span className="text-amber">saathi</span> for every
             journey in the city.
           </p>

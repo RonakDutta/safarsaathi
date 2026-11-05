@@ -13,7 +13,7 @@ export function SectionHeading({
     <div
       className={`${centered ? "mx-auto max-w-2xl text-center" : "max-w-2xl"} ${className}`}
     >
-      <h2 className="display text-3xl leading-tight sm:text-5xl">{title}</h2>
+      <h2 className="display text-3xl leading-snug sm:text-4xl lg:text-5xl lg:leading-[1.2]">{title}</h2>
       {body && (
         <p
           className={`mt-4 leading-relaxed text-mute sm:text-lg ${centered ? "mx-auto max-w-xl" : "max-w-xl"}`}
@@ -54,7 +54,7 @@ export function PageHero({ title, body, image, children, aside }) {
         }`}
       >
         <div className={aside ? "" : "max-w-3xl"}>
-          <h1 className="display text-5xl leading-[1.05] sm:text-6xl lg:text-7xl">
+          <h1 className="display text-4xl leading-tight sm:text-5xl lg:text-6xl lg:leading-[1.14]">
             {title}
           </h1>
           {body && (
@@ -75,14 +75,14 @@ export function ClosingCta({ title, body, to = "/#book", action = "Book a driver
     <section className="container-page py-20">
       <div className="flex flex-col gap-8 rounded-3xl bg-amber px-8 py-12 text-black sm:px-12 sm:py-16 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl">
-          <h2 className="text-3xl leading-tight font-bold tracking-tight sm:text-5xl">
+          <h2 className="text-3xl leading-snug font-bold sm:text-4xl lg:text-5xl lg:leading-[1.2]">
             {title}
           </h2>
-          {body && <p className="mt-4 text-black/70 sm:text-lg">{body}</p>}
+          {body && <p className="mt-4 text-black/75 sm:text-lg leading-relaxed">{body}</p>}
         </div>
         <Link
           to={to}
-          className="btn shrink-0 bg-black px-7 py-3.5 text-base text-white hover:bg-coal"
+          className="btn shrink-0 bg-black px-7 py-3.5 text-base font-semibold text-white hover:bg-coal"
         >
           {action}
           <ArrowRight size={18} />
